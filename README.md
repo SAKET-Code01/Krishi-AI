@@ -93,3 +93,12 @@ Backend currently has no automated tests.
 - The frontend currently uses Gemini directly from the browser.
 - The backend exposes an audio-processing endpoint at `/api/process-audio`.
 - Uploaded backend audio files are treated as runtime artifacts and should not be committed.
+
+## Contributors
+
+-Saket Kumar Seth
+-Debojeet 
+-Subhadeep Sharma
+-Subhra Padhy
+-Kritika Sahoo
+-Aditya Kumar Dutta
