@@ -1,0 +1,120 @@
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 142 72% 37%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 199 89% 48%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 72% 37%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(199, 89%, 48%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(210, 40%, 98%) 100%);
+    --shadow-card: 0 4px 24px -4px hsl(142 72% 37% / 0.1);
+    --shadow-elevated: 0 12px 40px -8px hsl(222 47% 11% / 0.15);
+    --font-display: "Plus Jakarta Sans", sans-serif;
+    --font-body: "Inter", sans-serif;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 142 72% 37%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 72% 95%;
+    --sidebar-accent-foreground: 142 72% 20%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 142 72% 37%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px 4px hsl(142 72% 37% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 24px 8px hsl(142 72% 37% / 0.5);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

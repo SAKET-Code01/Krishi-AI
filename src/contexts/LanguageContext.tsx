@@ -1,0 +1,278 @@
+import { createContext, useContext, useState, ReactNode } from "react";
+
+export type Language = "en" | "hi" | "or";
+
+type Translations = Record<string, Record<Language, string>>;
+
+const translations: Translations = {
+  // Nav
+  "nav.home": { en: "Home", hi: "होम", or: "ହୋମ" },
+  "nav.cropDoc": { en: "Crop Doc", hi: "फसल डॉक्टर", or: "ଫସଲ ଡାକ୍ତର" },
+  "nav.voiceAI": { en: "Voice AI", hi: "वॉइस AI", or: "ଭଏସ AI" },
+  "nav.market": { en: "Market", hi: "बाज़ार", or: "ବଜାର" },
+  "nav.jobs": { en: "Jobs", hi: "नौकरियाँ", or: "ଚାକିରି" },
+  // Index page
+  "hero.badge": { en: "AI-Powered Agriculture", hi: "AI-संचालित कृषि", or: "AI-ଚାଳିତ କୃଷି" },
+  "hero.title1": { en: "Smart Farming,", hi: "स्मार्ट खेती,", or: "ସ୍ମାର୍ଟ ଚାଷ," },
+  "hero.title2": { en: "Simplified.", hi: "सरल।", or: "ସରଳ।" },
+  "hero.desc": {
+    en: "AI crop guidance, voice assistant in your language, disease detection, market prices — everything a farmer needs.",
+    hi: "AI फसल मार्गदर्शन, आपकी भाषा में वॉइस असिस्टेंट, रोग पहचान, बाज़ार भाव — किसान को जो चाहिए सब कुछ।",
+    or: "AI ଫସଲ ମାର୍ଗଦର୍ଶନ, ଆପଣଙ୍କ ଭାଷାରେ ଭଏସ ଆସିଷ୍ଟାଣ୍ଟ, ରୋଗ ଚିହ୍ନଟ, ବଜାର ଦର — ଚାଷୀଙ୍କ ପାଇଁ ସବୁକିଛି।",
+  },
+  "hero.talkBtn": { en: "Talk to AI Assistant", hi: "AI असिस्टेंट से बात करें", or: "AI ଆସିଷ୍ଟାଣ୍ଟଙ୍କ ସହ କଥା ହୁଅନ୍ତୁ" },
+  "hero.exploreBtn": { en: "Explore Dashboard", hi: "डैशबोर्ड देखें", or: "ଡ୍ୟାସବୋର୍ଡ ଦେଖନ୍ତୁ" },
+  "hero.dashboard": { en: "Dashboard", hi: "डैशबोर्ड", or: "ଡ୍ୟାସବୋର୍ଡ" },
+  "features.title": { en: "Everything You Need", hi: "आपको जो चाहिए सब कुछ", or: "ଆପଣଙ୍କୁ ଯାହା ଦରକାର ସବୁ" },
+  "features.subtitle": {
+    en: "AI tools built for Indian farmers, available in Odia, Hindi & English.",
+    hi: "भारतीय किसानों के लिए AI उपकरण, ओडिया, हिंदी और अंग्रेज़ी में उपलब्ध।",
+    or: "ଭାରତୀୟ ଚାଷୀଙ୍କ ପାଇଁ AI ଉପକରଣ, ଓଡ଼ିଆ, ହିନ୍ଦୀ ଓ ଇଂରାଜୀରେ ଉପಲବ୍ଧ।",
+  },
+  "cta.title": { en: "Ready to Farm Smarter?", hi: "स्मार्ट खेती के लिए तैयार?", or: "ସ୍ମାର୍ଟ ଚାଷ ପାଇଁ ପ୍ରସ୍ତୁତ?" },
+  "cta.desc": {
+    en: "Join thousands of farmers using AI to increase yield and income.",
+    hi: "AI से उपज और आय बढ़ाने वाले हज़ारों किसानों से जुड़ें।",
+    or: "AI ସାହାଯ୍ୟରେ ଅମଳ ଓ ଆୟ ବଢ଼ାଉଥିବା ହଜାର ହଜାର ଚାଷୀଙ୍କ ସହ ଯୋଡ଼ି ହୁଅନ୍ତୁ।",
+  },
+  "cta.btn": { en: "Get Started Free", hi: "मुफ़्त शुरू करें", or: "ମାଗଣାରେ ଆରମ୍ଭ କରନ୍ତୁ" },
+  // Feature cards
+  "feat.voiceAI": { en: "Voice AI Assistant", hi: "वॉइस AI असिस्टेंट", or: "ଭଏସ AI ଆସିଷ୍ଟାଣ୍ଟ" },
+  "feat.voiceAI.desc": { en: "Ask farming questions in Odia, Hindi, or English using voice", hi: "ओडिया, हिंदी या अंग्रेज़ी में खेती के सवाल पूछें", or: "ଓଡ଼ିଆ, ହିନ୍ଦୀ କିମ୍ବା ଇଂରାଜୀରେ ଚାଷ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ" },
+  "feat.cropDoc": { en: "Crop Doctor", hi: "फसल डॉक्टर", or: "ଫସଲ ଡାକ୍ତର" },
+  "feat.cropDoc.desc": { en: "Upload plant photos for AI-powered disease detection", hi: "AI रोग पहचान के लिए पौधे की फ़ोटो अपलोड करें", or: "AI ରୋଗ ଚିହ୍ନଟ ପାଇଁ ଗଛ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ" },
+  "feat.weather": { en: "Weather Intelligence", hi: "मौसम जानकारी", or: "ପାଣିପାଗ ସୂଚନା" },
+  "feat.weather.desc": { en: "7-day forecasts with smart farming advice", hi: "स्मार्ट खेती सलाह के साथ 7 दिन का पूर्वानुमान", or: "ସ୍ମାର୍ଟ ଚାଷ ପରାମର୍ଶ ସହ ୭ ଦିନର ପୂର୍ବାନୁମାନ" },
+  "feat.market": { en: "Market Prices", hi: "बाज़ार भाव", or: "ବଜାର ଦର" },
+  "feat.market.desc": { en: "Live mandi prices and crop price trends", hi: "लाइव मंडी भाव और फसल मूल्य रुझान", or: "ଲାଇଭ ମଣ୍ଡି ଦର ଓ ଫସଲ ମୂଲ୍ୟ ରୁଝାନ" },
+  "feat.jobs": { en: "Farm Jobs", hi: "खेती नौकरियाँ", or: "ଚାଷ ଚାକିରି" },
+  "feat.jobs.desc": { en: "Find and post agricultural work opportunities", hi: "कृषि कार्य अवसर खोजें और पोस्ट करें", or: "କୃଷି କାର୍ଯ୍ୟ ସୁଯୋଗ ଖୋଜନ୍ତୁ ଓ ପୋଷ୍ଟ କରନ୍ତୁ" },
+  "feat.land": { en: "Land Finder", hi: "भूमि खोज", or: "ଜମି ଖୋଜ" },
+  "feat.land.desc": { en: "Discover vacant government land for cultivation", hi: "खेती के लिए खाली सरकारी भूमि खोजें", or: "ଚାଷ ପାଇଁ ଖାଲି ସରକାରୀ ଜମି ଖୋଜନ୍ତୁ" },
+  "feat.schemes": { en: "Govt Schemes", hi: "सरकारी योजनाएँ", or: "ସରକାରୀ ଯୋଜନା" },
+  "feat.schemes.desc": { en: "Subsidies, loans, and insurance programs", hi: "सब्सिडी, ऋण और बीमा योजनाएँ", or: "ସବସିଡି, ଋଣ ଓ ବୀମା ଯୋଜନା" },
+  "feat.cropPlanner": { en: "Crop Planner", hi: "फसल योजनाकार", or: "ଫସଲ ଯୋଜନାକାର" },
+  "feat.cropPlanner.desc": { en: "AI recommends the best crop for your soil and season", hi: "AI आपकी मिट्टी और मौसम के लिए सबसे अच्छी फसल सुझाता है", or: "AI ଆପଣଙ୍କ ମାଟି ଓ ଋତୁ ପାଇଁ ସର୍ବୋତ୍ତମ ଫସଲ ସୁପାରିଶ କରେ" },
+  // Dashboard
+  "dash.welcome": { en: "Welcome back,", hi: "स्वागत है,", or: "ସ୍ୱାଗତ," },
+  "dash.farmer": { en: "Farmer 🌾", hi: "किसान 🌾", or: "ଚାଷୀ 🌾" },
+  "dash.temp": { en: "Temperature", hi: "तापमान", or: "ତାପମାତ୍ରା" },
+  "dash.feelsLike": { en: "Feels like", hi: "महसूस", or: "ଅନୁଭବ" },
+  "dash.rainfall": { en: "Rainfall", hi: "वर्षा", or: "ବର୍ଷା" },
+  "dash.expectedIn": { en: "Expected in", hi: "अपेक्षित", or: "ସମ୍ଭାବ୍ୟ" },
+  "dash.ricePrice": { en: "Rice Price", hi: "चावल भाव", or: "ଚାଉଳ ଦର" },
+  "dash.cropHealth": { en: "Crop Health", hi: "फसल स्वास्थ्य", or: "ଫସଲ ସ୍ୱାସ୍ଥ୍ୟ" },
+  "dash.good": { en: "Good", hi: "अच्छा", or: "ଭଲ" },
+  "dash.alerts": { en: "Smart Alerts", hi: "स्मार्ट अलर्ट", or: "ସ୍ମାର୍ଟ ଆଲର୍ଟ" },
+  "dash.insight.title": { en: "Krishi Genius Insight", hi: "कृषि जीनियस अंतर्दृष्टि", or: "କୃଷି ଜିନିୟସ୍ ଅନ୍ତର୍ଦୃଷ୍ଟି" },
+  "dash.viewAll": { en: "View All", hi: "सभी देखें", or: "ସବୁ ଦେଖନ୍ତୁ" },
+  "dash.marketTrends": { en: "Market Trends", hi: "बाज़ार के रुझान", or: "ବଜାର ଧାରା" },
+  "weather.humidity": { en: "Humidity", hi: "नमी", or: "ଆର୍ଦ୍ରତା" },
+  "weather.windSpeed": { en: "Wind Speed", hi: "हवा की गति", or: "ପବନର ବେଗ" },
+  "weather.partlyCloudy": { en: "Partly Cloudy", hi: "आंशिक रूप से बादल", or: "ଆଂଶିକ ମେଘୁଆ" },
+  "crop.rice": { en: "Rice", hi: "चावल", or: "ଧାନ" },
+  "crop.wheat": { en: "Wheat", hi: "गेहूँ", or: "ଗହମ" },
+  "crop.mustard": { en: "Mustard", hi: "सरसों", or: "ସୋରିଷ" },
+  "dash.activeAlerts": { en: "Active", hi: "सक्रिय", or: "ସକ୍ରିୟ" },
+  "dash.insight.analyzing": { en: "Analyzing your farm data...", hi: "आपके खेत के डेटा का विश्लेषण किया जा रहा है...", or: "ଆପଣଙ୍କ ଫାର୍ମ ତଥ୍ୟ ବିଶ୍ଳେଷଣ କରାଯାଉଛି..." },
+  "dash.insight.mock": { en: "Ideal time to sow mustard seeds this week for better yield.", hi: "बेहतर उपज के लिए सरसों बोने का सही समय है।", or: "ଉନ୍ନତ ଅମଳ ପାଇଁ ସୋରିଷ ବୁଣିବାର ଏହା ପ୍ରକୃଷ୍ଟ ସମୟ |" },
+  "dash.insight.default": { en: "Focus on field drainage today.", hi: "आज खेतों की जल निकासी पर ध्यान दें।", or: "ଆଜି କ୍ଷେତର ଜଳ ନିଷ୍କାସନ ଉପରେ ଧ୍ୟାନ ଦିଅନ୍ତୁ |" },
+  "dash.insight.error": { en: "Ensure proper irrigation as temperatures rise.", hi: "तापमान बढ़ने पर सही सिंचाई सुनिश्चित करें।", or: "ତାପମାତ୍ରା ବଢ଼ିବା ସହିତ ଜଳସେଚନ ସୁନିଶ୍ଚିତ କରନ୍ତୁ |" },
+  "alert.rain": { en: "Heavy rain expected in 2 days. Delay fertilizer.", hi: "2 दिनों में भारी बारिश की संभावना। खाद टालें।", or: "୨ ଦିନରେ ପ୍ରବଳ ବର୍ଷା ସମ୍ଭାବନା | ସାର ପ୍ରୟୋଗ ବିଳମ୍ବ କରନ୍ତୁ |" },
+  "alert.mustard": { en: "Ideal time to sow mustard seeds this week.", hi: "सरसों बोने का यह सही समय है।", or: "ସୋରିଷ ବୁଣିବା ପାଇଁ ଏହା ଭଲ ସମୟ |" },
+  "alert.pest": { en: "Pest outbreak risk: Brown planthopper detected nearby.", hi: "कीट का खतरा: पास में भूरा फुदका देखा गया।", or: "ପୋକ ଆକ୍ରମଣ ଭୟ: ପାଖରେ ମାଟିଆ ଗୁଣ୍ଡି ପୋକ ଦେଖାଯାଇଛନ୍ତି |" },
+  "crop.healthyGrowth": { en: "Healthy Growth", hi: "स्वस्थ विकास", or: "ସୁସ୍ଥ ବିକାଶ" },
+  "reports.chart.crops": { en: "Crops", hi: "फसलें", or: "ଫସଲ" },
+  "reports.chart.fallow": { en: "Fallow", hi: "परती", or: "ପଡ଼ିଆ" },
+  "reports.chart.other": { en: "Other", hi: "अन्य", or: "ଅନ୍ୟାନ୍ୟ" },
+  "reports.vsLY": { en: "vs Last Year", hi: "पिछले साल की तुलना में", or: "ଗତ ବର୍ଷ ତୁଳନାରେ" },
+  "reports.risk.medium": { en: "Medium", hi: "मध्यम", or: "ମଧ୍ୟମ" },
+  "reports.risk.stable": { en: "Stable", hi: "स्थिर", or: "ସ୍ଥିର" },
+  "reports.tool.scythes": { en: "Scythes", hi: "दरांती", or: "ଦାଆ" },
+  "reports.tool.thresher": { en: "Thresher", hi: "थ्रेशर", or: "ଥ୍ରେସର" },
+  "reports.tool.bags": { en: "Storage Bags", hi: "भंडारण बैग", or: "ସଂରକ୍ଷଣ ବ୍ୟାଗ୍" },
+  // Crop Doctor
+  "crop.doctor.title": { en: "Crop Doctor", hi: "फसल डॉक्टर", or: "ଫସଲ ଡାକ୍ତର" },
+  "crop.upload.title": { en: "Upload Plant Photo", hi: "पौधे की फ़ोटो अपलोड करें", or: "ଗଛ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ" },
+  "crop.upload.desc": { en: "Take a photo or select from gallery", hi: "फ़ोटो लें या गैलरी से चुनें", or: "ଫଟୋ ଉଠାନ୍ତୁ କିମ୍ବା ଗ୍ୟାଲେରୀରୁ ବାଛନ୍ତୁ" },
+  "crop.analyze.btn": { en: "Analyze with AI", hi: "AI से विश्लेषण करें", or: "AI ସହିତ ବିଶ୍ଳେଷଣ କରନ୍ତୁ" },
+  "crop.analyzing": { en: "Analyzing...", hi: "विश्लेषण किया जा रहा है...", or: "ବିଶ୍ଳେଷଣ କରାଯାଉଛି..." },
+  "crop.change": { en: "Change", hi: "बदलें", or: "ବଦଳାନ୍ତୁ" },
+  "crop.diagnosis": { en: "Diagnosis", hi: "रोग पहचान", or: "ରୋଗ ନିଦାନ" },
+  "crop.confidence": { en: "Confidence", hi: "आत्मविश्वास", or: "ବିଶ୍ୱାସନୀୟତା" },
+  "crop.treatment": { en: "Treatment", hi: "उपचार", or: "ଚିକିତ୍ସା" },
+  "crop.fertilizers": { en: "Recommended Fertilizers", hi: "अनुशंसित उर्वरक", or: "ସୁପାରିଶ କରାଯାଇଥିବା ସାର" },
+  "crop.recentScans": { en: "Recent Scans", hi: "हाल के स्कैन", or: "ସାମ୍ପ୍ରତିକ ସ୍କାନ୍" },
+  "crop.status.resolved": { en: "Resolved", hi: "सुलझा हुआ", or: "ସମାଧାନ ହୋଇଛି" },
+  "crop.status.critical": { en: "Critical", hi: "गंभीर", or: "ଗୁରୁତର" },
+  // Market
+  "market.title": { en: "Market Prices", hi: "बाजार भाव", or: "ବଜାର ଦର" },
+  "market.subtitle": { en: "Live mandi prices", hi: "लाइव मंडी भाव", or: "ଲାଇଭ୍ ମଣ୍ଡି ଦର" },
+  "market.search": { en: "Search crop or market...", hi: "फसल या बाजार खोजें...", or: "ଫସଲ କିମ୍ବା ବଜାର ଖୋଜନ୍ତୁ ..." },
+  "crop.onion": { en: "Onion", hi: "प्याज", or: "ପିଆଜ" },
+  "crop.tomato": { en: "Tomato", hi: "टमाटर", or: "ଟମାଟୋ" },
+  "crop.potato": { en: "Potato", hi: "आलू", or: "ଆଳୁ" },
+  "crop.greenGram": { en: "Green Gram", hi: "मूँग", or: "ମୁଗ" },
+  "crop.sugarcane": { en: "Sugarcane", hi: "गन्ना", or: "ଆଖୁ" },
+  // Weather
+  "weather.title": { en: "Weather Intelligence", hi: "मौसम की जानकारी", or: "ପାଣିପାଗ ସୂଚନା" },
+  "weather.forecast": { en: "7-Day Forecast", hi: "7-दिवसीय पूर्वानुमान", or: "୭-ଦିନର ପୂର୍ବାନୁମାନ" },
+  "weather.advice": { en: "AI Farming Advice", hi: "AI खेती सलाह", or: "AI ଚାଷ ପରାମର୍ଶ" },
+  "weather.today": { en: "Today", hi: "आज", or: "ଆଜି" },
+  "weather.mon": { en: "Mon", hi: "सोम", or: "ସୋମ" },
+  "weather.tue": { en: "Tue", hi: "मंगल", or: "ମଙ୍ଗଳ" },
+  "weather.wed": { en: "Wed", hi: "बुध", or: "ବୁଧ" },
+  "weather.thu": { en: "Thu", hi: "गुरु", or: "ଗୁରୁ" },
+  "weather.fri": { en: "Fri", hi: "शुक्र", or: "ଶୁକ୍ର" },
+  "weather.sat": { en: "Sat", hi: "शनि", or: "ଶନି" },
+  "weather.sun": { en: "Sun", hi: "रवि", or: "ରବି" },
+  "weather.sunny": { en: "Sunny", hi: "धूप", or: "ଖରା" },
+  "weather.rainy": { en: "Rain", hi: "बारिश", or: "ବର୍ଷା" },
+  "weather.heavyRain": { en: "Heavy Rain", hi: "भारी बारिश", or: "ପ୍ରବଳ ବର୍ଷା" },
+  "weather.cloudy": { en: "Cloudy", hi: "बादल", or: "ମେଘୁଆ" },
+  "weather.location": { en: "Bhubaneswar", hi: "भुवनेश्वर", or: "ଭୁବନେଶ୍ୱର" },
+  "weather.advice.rain": { en: "Heavy rain expected on Wednesday. Delay fertilizer application.", hi: "बुधवार को भारी बारिश की संभावना। खाद डालने में देरी करें।", or: "ବୁଧବାର ପ୍ରବଳ ବର୍ଷା ସମ୍ଭାବନା | ସାର ପ୍ରୟୋଗ ବିଳମ୍ବ କରନ୍ତୁ |" },
+  "weather.advice.rice": { en: "Good conditions for transplanting rice seedlings on Thursday after rain.", hi: "बारिश के बाद गुरुवार को धान के पौधे रोपने के लिए अच्छी स्थिति।", or: "ବର୍ଷା ପରେ ଗୁରୁବାର ଧାନ ଚାରା ରୋପଣ ପାଇଁ ଭଲ ସମୟ |" },
+  "weather.advice.humidity": { en: "High humidity may increase pest risk. Monitor fields closely.", hi: "अधिक आर्द्रता से कीट का खतरा बढ़ सकता है। खेतों की बारीकी से निगरानी करें।", or: "ଅଧିକ ଆର୍ଦ୍ରତା ହେତୁ ପୋକ ଭୟ ବଢିପାରେ | କ୍ଷେତ ଉପରେ ନଜର ରଖନ୍ତୁ |" },
+  // Farm Jobs
+  "jobs.title": { en: "Farm Jobs", hi: "खेत की नौकरियाँ", or: "ଫାର୍ମ ଚାକିରି" },
+  "jobs.subtitle": { en: "Agriculture job marketplace", hi: "कृषि नौकरी बाजार", or: "କୃଷି ନିଯୁକ୍ତି ବଜାର" },
+  "jobs.post": { en: "Post Job", hi: "नौकरी पोस्ट करें", or: "ଚାକିରି ପୋଷ୍ଟ କରନ୍ତୁ" },
+  "jobs.apply": { en: "Apply Now", hi: "अभी आवेदन करें", or: "ବର୍ତ୍ତମାନ ଆବେଦନ କରନ୍ତୁ" },
+  "jobs.type.harvesting": { en: "Harvesting", hi: "कटाई", or: "ଅମଳ" },
+  "jobs.type.fulltime": { en: "Full-time", hi: "पूर्णकालिक", or: "ପୂର୍ଣ୍ଣକାଳୀନ" },
+  "jobs.type.seasonal": { en: "Seasonal", hi: "मौसमी", or: "ଋତୁକାଳୀନ" },
+  // Govt Schemes
+  "schemes.title": { en: "Govt Schemes", hi: "सरकारी योजनाएं", or: "ସରକାରୀ ଯୋଜନା" },
+  "schemes.subtitle": { en: "Subsidies, loans & insurance", hi: "सब्सिडी, ऋण और बीमा", or: "ସବସିଡି, ଋଣ ଏବଂ ବୀମା" },
+  "schemes.check": { en: "Check Eligibility", hi: "पात्रता जांचें", or: "ଯୋଗ୍ୟତା ଯାଞ୍ଚ କରନ୍ତୁ" },
+  "schemes.cat.subsidy": { en: "Subsidy", hi: "सब्सिडी", or: "ସବସିଡି" },
+  "schemes.cat.insurance": { en: "Insurance", hi: "बीमा", or: "ବୀମା" },
+  "schemes.cat.loan": { en: "Loan", hi: "ऋण", or: "ଋଣ" },
+  "schemes.cat.support": { en: "Support", hi: "सहायता", or: "ସହାୟତା" },
+  // Land Finder
+  "land.title": { en: "Land Finder", hi: "भूमि खोजक", or: "ଜମି ସନ୍ଧାନକାରୀ" },
+  "land.subtitle": { en: "Vacant govt agricultural land", hi: "खाली सरकारी कृषि भूमि", or: "ଖାଲି ସରକାରୀ କୃଷି ଜମି" },
+  "land.mapView": { en: "Map View", hi: "मानचित्र दृश्य", or: "ମ୍ୟାପ୍ ଭ୍ୟୁ" },
+  "land.mapDesc": { en: "Connect location services to see nearby land", hi: "आस-पास की भूमि देखने के लिए स्थान सेवाएँ कनेक्ट करें", or: "ନିକଟସ୍ଥ ଜମି ଦେଖିବା ପାଇଁ ଅବସ୍ଥାନ ସେବା ସହିତ ସଂଯୋଗ କରନ୍ତୁ" },
+  "land.available": { en: "Available Land", hi: "उपलब्ध भूमि", or: "ଉପଲବ୍ଧ ଜମି" },
+  "land.apply": { en: "Apply for Cultivation", hi: "खेती के लिए आवेदन करें", or: "ଚାଷ ପାଇଁ ଆବେଦନ କରନ୍ତୁ" },
+  "land.away": { en: "away", hi: "दूर", or: "ଦୂର" },
+  // Voice assistant
+  "voice.title": { en: "Krishi Assistant", hi: "कृषि सहायक", or: "କୃଷି ସହାୟକ" },
+  "voice.greeting": { en: "Hello Farmer Brother,", hi: "नमस्ते किसान भाई,", or: "ନମସ୍କାର ଚାଷୀ ଭାଇ," },
+  "voice.howHelp": { en: "How can I help you today?", hi: "मैं आपकी कैसे मदद कर सकता हूँ?", or: "ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?" },
+  "voice.prompt": { en: "Ask about crops, weather, or government schemes", hi: "फसल, मौसम या सरकारी योजनाओं के बारे में पूछें", or: "ଫସଲ, ପାଣିପାଗ କିମ୍ବା ସରକାରୀ ଯୋଜନା ବିଷୟରେ ପଚାରନ୍ତୁ" },
+  "voice.listening": { en: "Listening...", hi: "सुन रहा है...", or: "ଶୁଣୁଛି..." },
+  "voice.talkToMe": { en: "Talk to me", hi: "मुझसे बात करें", or: "ମୋ ସହ କଥା ହୁଅନ୍ତୁ" },
+  "voice.stopHint": { en: "Tap again to finish", hi: "समाप्त करने के लिए फिर से टैप करें", or: "ସାରିବା ପାଇଁ ପୁଣି ଥରେ ଦବାନ୍ତୁ" },
+  "voice.startHint": { en: "Tap and ask", hi: "टैप करें और पूछें", or: "ଦବାନ୍ତୁ ଏବଂ ପଚାରନ୍ତୁ" },
+  "voice.intent.weather": { en: "Weather", hi: "मौसम", or: "ପାଣିପାଗ" },
+  "voice.intent.market": { en: "Market Price", hi: "बाज़ार भाव", or: "ମଣ୍ଡି ଦର" },
+  "voice.intent.doctor": { en: "Diagnosis", hi: "निदान", or: "ରୋଗ ନିଦାନ" },
+  "voice.err.understand": { en: "Sorry, I can't understand right now.", hi: "क्षमा करें, मैं अभी समझ नहीं पा रहा हूँ।", or: "କ୍ଷମା କରିବେ, ମୁଁ ଏବେ ବୁଝିପାରୁ ନାହିଁ |" },
+  "voice.err.network": { en: "Network issue, please try again later.", hi: "नेटवर्क समस्या, कृपया बाद में पुनः प्रयास करें।", or: "ନେଟୱାର୍କ ସମସ୍ୟା, ଦୟାକରି ପରେ ଚେଷ୍ଟା କରନ୍ତୁ |" },
+  // Profile page
+  "profile.title": { en: "Farmer Profile", hi: "किसान प्रोफ़ाइल", or: "ଚାଷୀ ପ୍ରୋଫାଇଲ" },
+  "profile.subtitle": { en: "Tell us about your farm to get personalized recommendations", hi: "व्यक्तिगत सुझाव के लिए अपने खेत के बारे में बताएं", or: "ବ୍ୟକ୍ତିଗତ ସୁପାରିଶ ପାଇଁ ଆପଣଙ୍କ ଜମି ବିଷୟରେ କୁହନ୍ତୁ" },
+  "profile.name": { en: "Full Name", hi: "पूरा नाम", or: "ସମ୍ପୂର୍ଣ୍ଣ ନାମ" },
+  "profile.namePlaceholder": { en: "Enter your full name", hi: "अपना पूरा नाम दर्ज करें", or: "ଆପଣଙ୍କ ସମ୍ପୂର୍ଣ୍ଣ ନାମ ଲେଖନ୍ତୁ" },
+  "profile.location": { en: "Location (Village/District)", hi: "स्थान (गाँव/ज़िला)", or: "ସ୍ଥାନ (ଗାଁ/ଜିଲ୍ଲା)" },
+  "profile.locationPlaceholder": { en: "e.g., Puri, Odisha", hi: "जैसे, पुरी, ओडिशा", or: "ଯେପରି, ପୁରୀ, ଓଡ଼ିଶା" },
+  "profile.landSize": { en: "Land Size (in acres)", hi: "भूमि का आकार (एकड़ में)", or: "ଜମି ଆକାର (ଏକର ରେ)" },
+  "profile.landPlaceholder": { en: "e.g., 2.5", hi: "जैसे, 2.5", or: "ଯେପରି, ୨.୫" },
+  "profile.experience": { en: "Farming Experience", hi: "खेती का अनुभव", or: "ଚାଷ ଅଭିଜ୍ଞତା" },
+  "profile.exp.beginner": { en: "Beginner (0-2 years)", hi: "शुरुआती (0-2 साल)", or: "ଆରମ୍ଭକାରୀ (୦-୨ ବର୍ଷ)" },
+  "profile.exp.intermediate": { en: "Intermediate (3-10 years)", hi: "मध्यम (3-10 साल)", or: "ମଧ୍ୟମ (୩-୧୦ ବର୍ଷ)" },
+  "profile.exp.expert": { en: "Expert (10+ years)", hi: "विशेषज्ञ (10+ साल)", or: "ବିଶେଷଜ୍ଞ (୧୦+ ବର୍ଷ)" },
+  "profile.crops": { en: "Crops You Grow (optional)", hi: "आप कौन सी फसल उगाते हैं (वैकल्पिक)", or: "ଆପଣ କେଉଁ ଫସଲ ଚାଷ କରନ୍ତି (ଐଚ୍ଛିକ)" },
+  "profile.cropsPlaceholder": { en: "e.g., Rice, Wheat, Vegetables", hi: "जैसे, चावल, गेहूँ, सब्ज़ियाँ", or: "ଯେପରି, ଧାନ, ଗହମ, ପନିପରିବା" },
+  "profile.save": { en: "Save Profile", hi: "प्रोफ़ाइल सहेजें", or: "ପ୍ରୋଫାଇଲ ସେଭ୍ କରନ୍ତୁ" },
+  "profile.saved": { en: "Profile saved successfully!", hi: "प्रोफ़ाइल सफलतापूर्वक सहेजा गया!", or: "ପ୍ରୋଫାଇଲ ସଫଳତାର ସହ ସେଭ୍ ହେଲା!" },
+  // Reports page
+  "reports.title": { en: "Farm Analysis", hi: "फार्म विश्लेषण", or: "ଫାର୍ମ ବିଶ୍ଳେଷଣ" },
+  "reports.subtitle": { en: "AI-powered insights for your farm", hi: "आपके खेत के लिए AI-संचालित जानकारी", or: "ଆପଣଙ୍କ ଫାର୍ମ ପାଇଁ AI- ଚାଳିତ ସୂଚନା" },
+  "reports.efficiency": { en: "Efficiency Score", hi: "दक्षता स्कोर", or: "ଦକ୍ଷତା ସ୍କୋର" },
+  "reports.score.desc": { en: "Based on your experience and resource management", hi: "आपके अनुभव और संसाधन प्रबंधन के आधार पर", or: "ଆପଣଙ୍କ ଅଭିଜ୍ଞତା ଏବଂ ସମ୍ପଦ ପରିଚାଳନା ଉପରେ ଆଧାରିତ" },
+  "reports.landDist": { en: "Land Distribution", hi: "भूमि वितरण", or: "ଭୂମି ବଣ୍ଟନ" },
+  "reports.recommendations": { en: "AI Recommendations", hi: "AI अनुशंसाएँ", or: "AI ସୁପାରିଶ" },
+  "reports.diversify.title": { en: "Crop Diversification", hi: "फसल विविधीकरण", or: "ଫସଲ ବିବିଧତା" },
+  "reports.diversify.desc": { en: "Consider pulses to improve soil nitrogen levels.", hi: "मिट्टी के नाइट्रोजन स्तर को सुधारने के लिए दालें उगाने पर विचार करें।", or: "ମାଟିର ନାଇଟ୍ରୋଜେନ୍ ସ୍ତରରେ ଉନ୍ନତି ଆଣିବା ପାଇଁ ଡାଲି ଜାତୀୟ ଫସଲ ବିଷୟରେ ଚିନ୍ତା କରନ୍ତୁ |" },
+  "reports.water.title": { en: "Water Management", hi: "जल प्रबंधन", or: "ଜଳ ପରିଚାଳନା" },
+  "reports.water.desc": { en: "Drip irrigation could save 30% water for your land size.", hi: "ड्रिप सिंचाई आपके भूमि के आकार के लिए 30% पानी बचा सकती है।", or: "ଡ୍ରିପ୍ ଜଳସେଚନ ଆପଣଙ୍କ ଜମି ଆକାର ପାଇଁ ୩୦% ଜଳ ସଞ୍ଚୟ କରିପାରିବ |" },
+  "reports.financials": { en: "Financial Outlook", hi: "वित्तीय दृष्टिकोण", or: "ଆର୍ଥିକ ଦୃଷ୍ଟିକୋଣ" },
+  "reports.profit.est": { en: "Estimated Profit", hi: "अनुमानित लाभ", or: "ଆନୁମାନିକ ଲାଭ" },
+  "reports.profit.desc": { en: "Projected for the current crop cycle", hi: "वर्तमान फसल चक्र के लिए अनुमानित", or: "ସାମ୍ପ୍ରତିକ ଫସଲ ଚକ୍ର ପାଇଁ ପ୍ରୋଜେକ୍ଟ" },
+  "reports.risks": { en: "Risk Assessment", hi: "जोखिम मूल्यांकन", or: "ବିପଦ ମୂଲ୍ୟାଙ୍କନ" },
+  "reports.risk.weather": { en: "Weather Risk", hi: "मौसम जोखिम", or: "ପାଣିପାଗ ବିପଦ" },
+  "reports.risk.temp": { en: "Temperature Stability", hi: "तापमान स्थिरता", or: "ତାପମାତ୍ରା ସ୍ଥିରତା" },
+  "reports.harvesting": { en: "Harvesting Strategy", hi: "कटाई की रणनीति", or: "ଅମଳ ରଣନୀତି" },
+  "reports.harvesting.desc": { en: "Recommended tools for efficient harvesting", hi: "कुशल कटाई के लिए अनुशंसित उपकरण", or: "ଦକ୍ଷ ଅମଳ ପାଇଁ ସୁପାରିଶ କରାଯାଇଥିବା ଉପକରଣ |" },
+  "reports.products.title": { en: "Recommended Products", hi: "अनुशंसित उत्पाद", or: "ସୁପାରିଶ କରାଯାଇଥିବା ଉତ୍ପାଦ" },
+  "reports.backBtn": { en: "Back to Dashboard", hi: "डैशबोर्ड पर वापस जाएं", or: "ଡ୍ୟାସବୋର୍ଡକୁ ଫେରିଯାଅ" },
+  // Login page
+  "login.title": { en: "Welcome Back, Farmer!", hi: "स्वागत है, किसान!", or: "ସ୍ୱାଗତ, ଚାଷୀ!" },
+  "login.subtitle": { en: "Login to access your smart farming dashboard", hi: "अपना स्मार्ट खेती डैशबोर्ड एक्सेस करने के लिए लॉगिन करें", or: "ଆପଣଙ୍କ ସ୍ମାର୍ଟ ଚାଷ ଡ୍ୟାସବୋର୍ଡ ଆକ୍ସେସ ପାଇଁ ଲଗଇନ କରନ୍ତୁ" },
+  "login.phone": { en: "Mobile Number", hi: "मोबाइल नंबर", or: "ମୋବାଇଲ ନମ୍ବର" },
+  "login.phonePlaceholder": { en: "10-digit mobile number", hi: "10 अंक मोबाइल नंबर", or: "୧୦ ଅଙ୍କ ବିଶିଷ୍ଟ ମୋବାଇଲ ନମ୍ବର" },
+  "login.phoneError": { en: "Please enter a valid 10-digit mobile number", hi: "कृपया वैध 10 अंक का मोबाइल नंबर दर्ज करें", or: "ଦୟାକରି ସଠିକ ୧୦ ଅଙ୍କ ମୋବାଇଲ ନମ୍ବର ଦିଅନ୍ତୁ" },
+  "login.sendOtp": { en: "Send OTP", hi: "OTP भेजें", or: "OTP ପଠାନ୍ତୁ" },
+  "login.sending": { en: "Sending...", hi: "भेज रहे हैं...", or: "ପଠାଉଛି..." },
+  "login.otp": { en: "Enter OTP", hi: "OTP दर्ज करें", or: "OTP ଦିଅନ୍ତୁ" },
+  "login.otpSentTo": { en: "OTP sent to", hi: "OTP भेजा गया", or: "OTP ପଠାଗଲା" },
+  "login.change": { en: "Change", hi: "बदलें", or: "ପରିବର୍ତ୍ତନ" },
+  "login.verify": { en: "Verify & Login", hi: "सत्यापित करें & लॉगिन करें", or: "ଯାଞ୍ଚ ଓ ଲଗଇନ" },
+  "login.verifying": { en: "Verifying...", hi: "सत्यापन हो रहा है...", or: "ଯାଞ୍ଚ ହେଉଛି..." },
+  "login.noOtp": { en: "Didn't receive?", hi: "OTP नहीं मिला?", or: "OTP ମିଳିଲା ନାହିଁ?" },
+  "login.resend": { en: "Resend", hi: "फिर भेजें", or: "ପୁନଃ ପଠାନ୍ତୁ" },
+  "login.or": { en: "or", hi: "या", or: "କିମ୍ବା" },
+  "login.guest": { en: "Continue as Guest", hi: "अतिथि के रूप में जारी रखें", or: "ଅତିଥି ଭାବରେ ଜାରି ରଖନ୍ତୁ" },
+  "login.terms": { en: "By continuing, you agree to our Terms of Service and Privacy Policy.", hi: "जारी रखकर, आप हमारी सेवा शर्तों और गोपनीयता नीति से सहमत हैं।", or: "ଜାରି ରଖି ଆପଣ ଆମ ସେବା ସର୍ତ୍ତ ଓ ଗୋପନୀୟତା ନୀତି ସହ ସହମତ |" },
+  "login.backHome": { en: "Back to Home", hi: "होम पर वापस जाएं", or: "ହୋମକୁ ଫେରନ୍ତୁ" },
+  "login.heroTitle1": { en: "Farm Smarter,", hi: "स्मार्ट खेती,", or: "ସ୍ମାର୍ଟ ଚାଷ," },
+  "login.heroTitle2": { en: "Live Better.", hi: "बेहतर जीवन।", or: "ସୁନ୍ଦର ଜୀବନ।" },
+  "login.heroDesc": { en: "AI-powered tools for weather, market prices, crop disease, and government schemes — all in your language.", hi: "मौसम, बाज़ार भाव, फसल रोग और सरकारी योजनाओं के लिए AI उपकरण — आपकी भाषा में।", or: "ପାଣିପାଗ, ବଜାର ଦର, ଫସଲ ରୋଗ ଓ ସରକାରୀ ଯୋଜନା ପାଇଁ AI ଉପକରଣ — ଆପଣଙ୍କ ଭାଷାରେ |" },
+  "login.stat.farmers": { en: "Active Farmers", hi: "सक्रिय किसान", or: "ସକ୍ରିୟ ଚାଷୀ" },
+  "login.stat.accuracy": { en: "AI Accuracy", hi: "AI सटीकता", or: "AI ସଠିକତା" },
+  "login.stat.free": { en: "Free to Use", hi: "मुफ़्त उपयोग", or: "ମାଗଣା ବ୍ୟବହାର" },
+  "login.card.title": { en: "AI Crop Doctor Active", hi: "AI फसल डॉक्टर सक्रिय", or: "AI ଫସଲ ଡାକ୍ତର ସକ୍ରିୟ" },
+  "login.card.sub": { en: "Scan any plant for instant diagnosis", hi: "तुरंत निदान के लिए कोई भी पौधा स्कैन करें", or: "ତୁରନ୍ତ ନିଦାନ ପାଇଁ ଯେକୌଣସି ଗଛ ସ୍କ୍ୟାନ କରନ୍ତୁ" },
+  // Language
+  "lang.label": { en: "Language", hi: "भाषा", or: "ଭାଷା" },
+};
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType>({
+  language: "en",
+  setLanguage: () => {},
+  t: (key: string) => key,
+});
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>(() => {
+    const saved = localStorage.getItem("krishi-lang");
+    return (saved as Language) || "en";
+  });
+
+  const handleSetLanguage = (lang: Language) => {
+    setLanguage(lang);
+    localStorage.setItem("krishi-lang", lang);
+  };
+
+  const t = (key: string): string => {
+    return translations[key]?.[language] || translations[key]?.["en"] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);
