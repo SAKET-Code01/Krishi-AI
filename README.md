@@ -100,5 +100,5 @@ Backend currently has no automated tests.
 -Debojeet 
 -Subhadeep Sharma
 -Subhra Padhy
--Kritika Sahoo
 -Aditya Kumar Dutta
+-Kritika Sahoo
