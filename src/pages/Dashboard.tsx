@@ -61,7 +61,7 @@ const KrishiInsight = () => {
                         language === "or" ? "Odia" : language === "hi" ? "Hindi" : "English"
                       } based on: Location: Bhubaneswar, Temp: 32°C, Weather: Partly Cloudy. Markets: Rice ₹2,150 (up), Wheat ₹2,340 (down). Give me today's pro farming tip.`;
 
-        const response = await fetch("http://localhost:3001/api/chat", {
+        const response = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
