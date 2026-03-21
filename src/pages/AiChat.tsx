@@ -160,8 +160,8 @@ const AiChat = () => {
     return true; // For English, we assume true.
   };
 
-  const handleSend = async () => {
-    if (!input.trim() && !selectedImage) return;
+  const handleSend = useCallback(async () => {
+    if ((!input.trim() && !selectedImage) || isLoading) return;
     if (isListening) toggleListen(); // Stop mic if listening
 
     const currentInput = input;
@@ -176,16 +176,7 @@ const AiChat = () => {
       imageUrl: currentPreview || undefined,
     };
     
-    setMessages((prev) => [
-      ...prev, 
-      userMsg,
-      {
-        id: (Date.now() + 1).toString(),
-        text: "Connecting to server...",
-        sender: "ai",
-        timestamp: new Date()
-      }
-    ]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setSelectedImage(null);
     setImagePreview(null);
@@ -199,7 +190,7 @@ const AiChat = () => {
         formData.append("image", currentImage);
         formData.append("prompt", currentInput || "Analyze this image and identify any diseases or crop conditions.");
         
-        const response = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
+        const response = await fetch("http://localhost:3001/api/chat", {
   method: "POST",
   body: formData,
 });
@@ -213,7 +204,7 @@ const AiChat = () => {
           ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Odia language. Keep actionable."
           : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
 
-        let response = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
+        let response = await fetch("http://localhost:3001/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
@@ -231,7 +222,7 @@ const AiChat = () => {
         if (!isCorrectLanguage(aiText, language)) {
           // Language mismatch detected, retrying with stricter prompt
           const stricterPrompt = language === "hi" ? "Respond strictly in Hindi only." : "Respond strictly in Odia language only.";
-          const retryResponse = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
+          const retryResponse = await fetch("http://localhost:3001/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: currentInput, systemPrompt: `${baseSystemPrompt} ${stricterPrompt}` }),
@@ -269,7 +260,7 @@ const AiChat = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, selectedImage, isLoading, isListening, language, toggleListen, isCorrectLanguage, speakText]);
 
   const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -445,7 +436,7 @@ const AiChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                   e.preventDefault();
                   handleSend();
                 }
