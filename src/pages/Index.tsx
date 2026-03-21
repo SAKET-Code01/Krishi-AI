@@ -38,6 +38,7 @@ const Index = () => {
     { icon: TrendingUp, title: t("feat.market"), description: t("feat.market.desc"), path: "/market" },
     { icon: Briefcase, title: t("feat.jobs"), description: t("feat.jobs.desc"), path: "/jobs" },
     { icon: MapPin, title: t("feat.land"), description: t("feat.land.desc"), path: "/land" },
+    { icon: Leaf, title: t("feat.cropPlanner"), description: t("feat.cropPlanner.desc"), path: "/reports" },
     { icon: FileText, title: t("feat.schemes"), description: t("feat.schemes.desc"), path: "/schemes" },
   ];
 
@@ -138,7 +139,7 @@ const Index = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {features.map((f) => (
-            <motion.div key={f.title} variants={item}>
+            <motion.div key={f.path} variants={item}>
               <FeatureCard {...f} />
             </motion.div>
           ))}
