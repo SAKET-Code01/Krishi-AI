@@ -252,8 +252,16 @@ const translations: Translations = {
   "login.stat.free": { en: "Free to Use", hi: "मुफ़्त उपयोग", or: "ମାଗଣା ବ୍ୟବହାର" },
   "login.card.title": { en: "AI Crop Doctor Active", hi: "AI फसल डॉक्टर सक्रिय", or: "AI ଫସଲ ଡାକ୍ତର ସକ୍ରିୟ" },
   "login.card.sub": { en: "Scan any plant for instant diagnosis", hi: "तुरंत निदान के लिए कोई भी पौधा स्कैन करें", or: "ତୁରନ୍ତ ନିଦାନ ପାଇଁ ଯେକୌଣସି ଗଛ ସ୍କ୍ୟାନ କରନ୍ତୁ" },
+  // AI Chat
+  "aiChat.title": { en: "AI Chat", hi: "AI चैट", or: "AI ଚାଟ୍" },
+  "aiChat.subtitle": { en: "Ask farming queries", hi: "खेती के सवाल पूछें", or: "ଚାଷ ପ୍ରଶ୍ନ ପଚାରନ୍ତୁ" },
+  "aiChat.placeholder": { en: "Message Krishi AI...", hi: "कृषि AI को संदेश भेजें...", or: "କୃଷି AI କୁ ବାର୍ତ୍ତା ପଠାନ୍ତୁ..." },
+  "aiChat.greeting": { en: "Hello! I am Krishi AI. How can I help you with your farm today?", hi: "नमस्ते! मैं कृषि AI हूँ। आज मैं आपके खेत के लिए कैसे मदद कर सकता हूँ?", or: "ନମସ୍କାର! ମୁଁ କୃଷି AI । ଆଜି ମୁଁ ଆପଣଙ୍କ ଫାର୍ମ ପାଇଁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?" },
+  "aiChat.typing": { en: "Krishi AI is typing...", hi: "कृषि AI टाइप कर रहा है...", or: "କୃଷି AI ଟାଇପ୍ କରୁଛି..." },
   // Language
   "lang.label": { en: "Language", hi: "भाषा", or: "ଭାଷା" },
+  // Profile
+  "profile.weather": { en: "Select Weather Condition", hi: "मौसम की स्थिति चुनें", or: "ପାଣିପାଗ ସ୍ଥିତି ବାଛନ୍ତୁ" },
 };
 
 interface LanguageContextType {

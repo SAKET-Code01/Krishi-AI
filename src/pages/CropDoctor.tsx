@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Stethoscope, Leaf, Bug, Droplets, ArrowLeft, CheckCircle, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
+import { Upload, Camera, Stethoscope, Leaf, Bug, Droplets, ArrowLeft, CheckCircle, AlertTriangle, RefreshCw, Trash2, MapPin, Sun, Cloud, CloudRain, Wind } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface DiagnosisResult {
   disease: string;
@@ -33,12 +35,42 @@ const CropDoctor = () => {
   const [error, setError] = useState<string | null>(null);
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
 
+  const [location, setLocation] = useState("");
+  const [weather, setWeather] = useState("Sunny");
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [showLocSuggestions, setShowLocSuggestions] = useState(false);
+
   useEffect(() => {
-    const saved = localStorage.getItem(SCAN_HISTORY_KEY);
-    if (saved) {
-      setScanHistory(JSON.parse(saved));
+    const savedHistory = localStorage.getItem(SCAN_HISTORY_KEY);
+    if (savedHistory) {
+      setScanHistory(JSON.parse(savedHistory));
+    }
+
+    const savedProfile = localStorage.getItem("krishi-ai-profile");
+    if (savedProfile) {
+      try {
+        const parsed = JSON.parse(savedProfile);
+        if (parsed.location) setLocation(parsed.location);
+        if (parsed.weather) setWeather(parsed.weather);
+      } catch (e) {}
     }
   }, []);
+
+  const handleLocationChange = async (val: string) => {
+    setLocation(val);
+    if (val.length > 2) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&countrycodes=in&format=json&limit=5`);
+        const data = await res.json();
+        setLocationSuggestions(data);
+        setShowLocSuggestions(true);
+      } catch {
+        // ignore
+      }
+    } else {
+      setShowLocSuggestions(false);
+    }
+  };
 
   const saveScanToHistory = (diagnosis: DiagnosisResult, thumbnail?: string) => {
     const newRecord: ScanRecord = {
@@ -68,88 +100,52 @@ const CropDoctor = () => {
   };
 
   const analyzeImage = async (base64Image: string) => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    try {
+      const match = base64Image.match(/^data:(image\/\w+);base64,(.+)$/);
+      const mimeType = match ? match[1] : "image/jpeg";
+      const base64Data = match ? match[2] : base64Image;
+      const prompt = "Analyze this image and provide a JSON response exactly matching this format: { \"disease\": \"disease name\", \"confidence\": 95, \"symptoms\": [\"symptom 1\"], \"treatment\": [\"treatment 1\"], \"fertilizers\": [\"fertilizer 1\"] }. Respond ONLY with valid JSON.";
 
-    if (!apiKey || apiKey === "your_gemini_api_key_here") {
-      // Fallback demo result
-      const fallback: DiagnosisResult = {
-        disease: "Bacterial Leaf Blight",
-        confidence: 92,
-        symptoms: ["Yellow-brown lesions on leaf edges", "Wilting of leaves", "Reduced grain filling"],
-        treatment: [
-          "Apply Streptocycline 0.01% spray",
-          "Use copper oxychloride 0.25% solution",
-          "Remove and destroy infected leaves",
-          "Ensure proper field drainage",
-        ],
-        fertilizers: ["Potash (MOP) — 20kg/acre", "Zinc Sulphate — 5kg/acre"],
-      };
-      setResult(fallback);
-      saveScanToHistory(fallback, base64Image);
-      return;
-    }
-
-    const base64Data = base64Image.split(",")[1];
-    const mimeType = base64Image.split(";")[0].split(":")[1];
-
-    const langName = language === "or" ? "Odia" : language === "hi" ? "Hindi" : "English";
-
-    const prompt = `You are an expert plant pathologist and agricultural scientist. Carefully analyze the provided plant/crop image and provide a detailed diagnosis.
-
-IMPORTANT RULES:
-1. Provide ALL text fields in ${langName} language/script
-2. If the image is NOT a plant or crop, set disease to "No plant detected" and confidence to 0
-3. If the plant appears healthy, set disease to "Healthy Plant" and confidence to 100
-4. Confidence should be a number between 0-100 representing how certain you are
-5. Be specific and actionable in your treatment and fertilizer recommendations
-6. Return ONLY valid JSON, no markdown, no extra text
-
-Return this exact JSON structure:
-{
-  "disease": "disease name or condition",
-  "confidence": 85,
-  "symptoms": ["symptom 1", "symptom 2", "symptom 3"],
-  "treatment": ["step 1", "step 2", "step 3", "step 4"],
-  "fertilizers": ["fertilizer 1 with dosage", "fertilizer 2 with dosage"]
-}`;
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
+      const response = await fetch("http://localhost:3001/api/vision", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: base64Data,
-                  },
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            maxOutputTokens: 1200,
-            temperature: 0.1,
-          },
+          prompt: prompt,
+          imageBase64: base64Data,
+          mimeType: mimeType,
         }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const data = await response.json();
+      const rawText = data.text || "{}";
+      const cleanJson = rawText.replace(/```json|```/g, "").trim();
+      
+      let aiResult: DiagnosisResult;
+      try {
+        aiResult = JSON.parse(cleanJson);
+      } catch (e) {
+        // Fallback if the AI didn't return perfect JSON
+        aiResult = {
+          disease: "Unknown Condition",
+          confidence: 0,
+          symptoms: ["Unable to parse AI response"],
+          treatment: ["Please try submitting the image again."],
+          fertilizers: []
+        };
+      }
+      
+      setResult(aiResult);
+      saveScanToHistory(aiResult, base64Image);
+    } catch (err) {
+      console.error("Diagnosis error:", err);
+      throw err;
     }
-
-    const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    const cleanJson = rawText.replace(/```json|```/g, "").trim();
-    const aiResult: DiagnosisResult = JSON.parse(cleanJson);
-    setResult(aiResult);
-    saveScanToHistory(aiResult, base64Image);
   };
 
   const handleAnalyze = async () => {
@@ -196,6 +192,66 @@ Return this exact JSON structure:
       </div>
 
       <div className="container mx-auto px-4 py-6 max-w-lg">
+        {/* Location & Weather Context Options */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 space-y-4 bg-card p-4 rounded-2xl border-2 border-border">
+          <div className="space-y-2 relative">
+            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
+              <MapPin className="w-4 h-4 text-primary" />
+              {t("profile.location") || "Field Location"}
+            </Label>
+            <Input
+              value={location}
+              onChange={(e) => handleLocationChange(e.target.value)}
+              onFocus={() => {
+                if (locationSuggestions.length > 0) setShowLocSuggestions(true);
+              }}
+              onBlur={() => setTimeout(() => setShowLocSuggestions(false), 200)}
+              placeholder="Enter field location"
+              className="rounded-xl border-2 border-border bg-background h-12 text-base font-body"
+            />
+            {showLocSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute top-[72px] left-0 right-0 z-20 bg-card border-2 border-border mt-1 rounded-xl shadow-lg max-h-48 overflow-y-auto w-full">
+                {locationSuggestions.map((loc: any) => (
+                  <div
+                    key={loc.place_id}
+                    className="p-3 hover:bg-muted cursor-pointer text-sm font-body border-b border-border last:border-0 truncate"
+                    onClick={() => {
+                      setLocation(loc.display_name);
+                      setShowLocSuggestions(false);
+                    }}
+                  >
+                    {loc.display_name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
+              <Sun className="w-4 h-4 text-primary" />
+              {t("profile.weather") || "Current Weather Context"}
+            </Label>
+            <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {(["Sunny", "Rainy", "Cloudy", "Windy"] as const).map((w) => (
+                <div
+                  key={w}
+                  onClick={() => setWeather(w)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 cursor-pointer transition-colors whitespace-nowrap shrink-0 ${
+                    weather === w ? 'border-primary bg-primary/10' : 'border-border bg-background hover:border-primary/50'
+                  }`}
+                >
+                  {w === "Sunny" && <Sun className="w-4 h-4 text-amber-500" />}
+                  {w === "Rainy" && <CloudRain className="w-4 h-4 text-blue-500" />}
+                  {w === "Cloudy" && <Cloud className="w-4 h-4 text-slate-400" />}
+                  {w === "Windy" && <Wind className="w-4 h-4 text-teal-500" />}
+                  <span className="text-sm font-body text-foreground">{w}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Upload/Preview area */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           {!image ? (

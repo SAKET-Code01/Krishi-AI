@@ -1,4 +1,4 @@
-import { Home, Stethoscope, TrendingUp, User, Mic } from "lucide-react";
+import { Home, Stethoscope, ShoppingCart, User, MessageSquare } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -6,8 +6,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const navItems = [
   { icon: Home, labelKey: "nav.home", path: "/dashboard" },
   { icon: Stethoscope, labelKey: "nav.cropDoc", path: "/crop-doctor" },
-  { icon: Mic, labelKey: "nav.voiceAI", path: "/voice-assistant", isCenter: true },
-  { icon: TrendingUp, labelKey: "nav.market", path: "/market" },
+  { icon: MessageSquare, labelKey: "aiChat.title", path: "/ai-chat", isCenter: true },
+  { icon: ShoppingCart, labelKey: "nav.market", path: "/market" },
   { icon: User, labelKey: "profile.title", path: "/profile" },
 ];
 

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +17,14 @@ import Profile from "./pages/Profile.tsx";
 import Reports from "./pages/Reports.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AiChat from "./pages/AiChat.tsx";
+import { ReactNode } from "react";
+
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const userType = localStorage.getItem("userType");
+  if (!userType) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
 
 const queryClient = new QueryClient();
 
@@ -30,16 +38,17 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/crop-doctor" element={<CropDoctor />} />
-            <Route path="/voice-assistant" element={<VoiceAssistant />} />
-            <Route path="/market" element={<MarketPrices />} />
-            <Route path="/jobs" element={<FarmJobs />} />
-            <Route path="/weather" element={<Weather />} />
-            <Route path="/schemes" element={<GovtSchemes />} />
-            <Route path="/land" element={<LandFinder />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/crop-doctor" element={<ProtectedRoute><CropDoctor /></ProtectedRoute>} />
+            <Route path="/voice-assistant" element={<ProtectedRoute><VoiceAssistant /></ProtectedRoute>} />
+            <Route path="/market" element={<ProtectedRoute><MarketPrices /></ProtectedRoute>} />
+            <Route path="/jobs" element={<ProtectedRoute><FarmJobs /></ProtectedRoute>} />
+            <Route path="/weather" element={<ProtectedRoute><Weather /></ProtectedRoute>} />
+            <Route path="/schemes" element={<ProtectedRoute><GovtSchemes /></ProtectedRoute>} />
+            <Route path="/land" element={<ProtectedRoute><LandFinder /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+            <Route path="/ai-chat" element={<ProtectedRoute><AiChat /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

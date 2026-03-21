@@ -7,11 +7,21 @@ const path = require('path');
 const speech = require('@google-cloud/speech');
 const textToSpeech = require('@google-cloud/text-to-speech');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const rateLimit = require('express-rate-limit');
 
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+dotenv.config(); // Loads backend/.env
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') }); // Fallback to root .env if needed
 
 const app = express();
 const uploadsDir = path.join(__dirname, 'uploads');
+
+const limiter = rateLimit({
+  windowMs: 1000, // 1 second
+  max: 5, // Limit each IP to 5 requests per second
+  message: { error: 'Too many requests, please try again later.', text: 'Krishi AI is busy right now. Please wait a moment.' },
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
 
 app.use(cors());
 app.use(express.json());
@@ -106,6 +116,163 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
     res.status(500).json({ error: 'Failed to process farming request' });
   } finally {
     safeUnlink(audioFilePath);
+  }
+});
+
+app.post('/api/chat', limiter, async (req, res) => {
+  const { message, systemPrompt } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') {
+    return res.json({ text: "Due to network issue, basic advice: check soil moisture and pests.", success: false });
+  }
+
+  const defaultSystemPrompt = "You are Krishi AI, an expert agriculture assistant helping farmers with simple, practical, India-focused advice. Keep answers short, clear, and actionable.";
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+          {
+            "role": "system",
+            "content": systemPrompt || defaultSystemPrompt
+          },
+          {
+            "role": "user",
+            "content": message
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+        throw new Error('Groq API failure');
+    }
+
+    const data = await response.json();
+    const aiText = data.choices?.[0]?.message?.content;
+    
+    if (!aiText) throw new Error("Empty response from Groq");
+
+    res.json({ text: aiText, success: true });
+  } catch (error) {
+    console.error('Groq Chat error:', error);
+    res.json({ text: "Due to network issue, basic advice: check soil moisture and pests.", success: false });
+  }
+});
+
+app.post('/api/vision', async (req, res) => {
+  const { prompt, imageBase64, mimeType } = req.body;
+
+  if (!prompt || !imageBase64) {
+    return res.status(400).json({ error: 'Prompt and image are required' });
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+    return res.status(500).json({ error: 'OpenRouter API key is missing' });
+  }
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "model": "google/gemini-1.5-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": prompt
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`
+                }
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('OpenRouter Vision Error:', errorData);
+        throw new Error('OpenRouter Vision API failure');
+    }
+
+    const data = await response.json();
+    const aiText = data.choices[0]?.message?.content || "{}";
+
+    res.json({ text: aiText, success: true });
+  } catch (error) {
+    console.error('Vision error:', error);
+    res.status(500).json({ error: 'Failed to analyze image' });
+  }
+});
+
+app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res) => {
+  const imageFilePath = req.file?.path;
+
+  if (!imageFilePath) {
+    return res.status(400).json({ error: 'Image file is required' });
+  }
+
+  const apiKey = process.env.HF_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_HF_API_KEY_HERE') {
+    safeUnlink(imageFilePath);
+    return res.json({ text: "This looks like a possible plant disease. Recommended: use neem oil spray and monitor leaves.", success: false });
+  }
+
+  try {
+    const imageBuffer = fs.readFileSync(imageFilePath);
+    
+    // We send the buffer directly to HF Vision model
+    const response = await fetch("https://api-inference.huggingface.co/models/google/vit-base-patch16-224", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/octet-stream"
+      },
+      body: imageBuffer,
+    });
+
+    if (!response.ok) {
+        throw new Error('Hugging Face Vision API failure');
+    }
+
+    const data = await response.json();
+    
+    // Hugging face returns an array of predictions [{ label, score }, ...]
+    const topPrediction = data?.[0]?.label || "Unknown Plant";
+    const aiText = `Image Analysis Result: Detected primarily as **${topPrediction}**. Wait for further contextual analysis or monitor continuously for specific diseases.`;
+
+    res.json({ text: aiText, success: true, predictions: data });
+  } catch (error) {
+    console.error('Vision error:', error);
+    res.json({ text: "This looks like a possible plant disease. Recommended: use neem oil spray and monitor leaves.", success: false });
+  } finally {
+    safeUnlink(imageFilePath);
   }
 });
 

@@ -61,45 +61,27 @@ const VoiceAssistant = () => {
     setMessages((prev) => [...prev, { role: "user", text: trimmedText }]);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-      if (!apiKey || apiKey === "your_gemini_api_key_here") {
-        throw new Error("Missing Gemini API key");
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `You are 'Krushi Sahayaka', a wise agricultural expert. Provide advice on rice, pulses, soil health, and weather. IMPORTANT: Always respond in ${
+      const systemMsg = `You are 'Krushi Sahayaka', a wise agricultural expert. Provide advice on rice, pulses, soil health, and weather. IMPORTANT: Always respond in ${
                       language === "or"
                         ? "Odia"
                         : language === "hi"
                           ? "Hindi"
                           : "English"
-                    } script. Keep answers simple, traditional, and helpful. Answer the farmer's question: ${trimmedText}`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 600,
-            },
-          }),
-        },
-      );
+                    } script. Keep answers simple, traditional, and helpful.`;
+
+      const response = await fetch("http://localhost:3001/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `Answer the farmer's question: ${trimmedText}`,
+          systemPrompt: systemMsg
+        }),
+      });
+
+      if (!response.ok) throw new Error("Backend connection failed");
 
       const data = await response.json();
-      const responseText =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        t("voice.err.understand");
+      const responseText = data.text || t("voice.err.understand");
 
       setMessages((prev) => [...prev, { role: "assistant", text: responseText }]);
 

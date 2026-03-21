@@ -100,7 +100,7 @@ const Index = () => {
             <div className="flex flex-wrap gap-3">
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/voice-assistant")}
+                onClick={() => navigate("/login")}
                 className="flex items-center gap-2 px-6 py-3.5 rounded-xl gradient-hero text-primary-foreground font-display font-bold text-base animate-pulse-glow"
               >
                 <Mic className="w-5 h-5" />
@@ -108,7 +108,7 @@ const Index = () => {
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/login")}
                 className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/20 backdrop-blur-md border-2 border-white/30 text-primary-foreground font-display font-bold text-base hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 shadow-lg"
               >
                 {t("hero.exploreBtn")}
@@ -158,7 +158,7 @@ const Index = () => {
           <p className="text-primary-foreground/80 font-body mb-6 max-w-md mx-auto">{t("cta.desc")}</p>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/login")}
             className="px-8 py-3.5 rounded-xl bg-primary-foreground text-primary font-display font-bold text-base hover:opacity-90 transition-opacity"
           >
             {t("cta.btn")}

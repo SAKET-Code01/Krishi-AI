@@ -49,11 +49,15 @@ const Login = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigate("/dashboard");
+      localStorage.setItem("userType", "authenticated");
+      navigate("/profile");
     }, 1000);
   };
 
-  const handleGuest = () => navigate("/dashboard");
+  const handleGuest = () => {
+    localStorage.setItem("userType", "guest");
+    navigate("/profile");
+  };
 
   const stats = [
     { icon: Users, label: t("login.stat.farmers"), value: "50K+" },

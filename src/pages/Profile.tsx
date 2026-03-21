@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, MapPin, Ruler, Sprout, Award, Save, Check } from "lucide-react";
+import { ArrowLeft, User, MapPin, Ruler, Sprout, Award, Save, Check, Sun, Cloud, CloudRain, Wind } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -19,8 +19,27 @@ const Profile = () => {
     const stored = localStorage.getItem("krishi-ai-profile");
     return stored
       ? JSON.parse(stored)
-      : { name: "", location: "", landSize: "", experience: "beginner", crops: "" };
+      : { name: "", location: "", landSize: "", experience: "beginner", crops: "", weather: "Sunny" };
   });
+
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleLocationChange = async (val: string) => {
+    setForm({ ...form, location: val });
+    if (val.length > 2) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&countrycodes=in&format=json&limit=5`);
+        const data = await res.json();
+        setLocationSuggestions(data);
+        setShowSuggestions(true);
+      } catch {
+        // ignore
+      }
+    } else {
+      setShowSuggestions(false);
+    }
+  };
 
   const handleSave = () => {
     if (!form.name.trim() || !form.location.trim() || !form.landSize.trim()) {
@@ -83,18 +102,38 @@ const Profile = () => {
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
               <MapPin className="w-4 h-4 text-primary" />
-              {t("profile.location")}
+              {t("profile.location") || "Location"}
             </Label>
             <Input
               value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              placeholder={t("profile.locationPlaceholder")}
+              onChange={(e) => handleLocationChange(e.target.value)}
+              onFocus={() => {
+                if (locationSuggestions.length > 0) setShowSuggestions(true);
+              }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              placeholder={t("profile.locationPlaceholder") || "Enter your location"}
               maxLength={200}
               className="rounded-xl border-2 border-border bg-card h-12 text-base font-body"
             />
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div className="absolute top-[72px] left-0 right-0 z-20 bg-card border-2 border-border mt-1 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                {locationSuggestions.map((loc: any) => (
+                  <div
+                    key={loc.place_id}
+                    className="p-3 hover:bg-muted cursor-pointer text-sm font-body border-b border-border last:border-0 truncate"
+                    onClick={() => {
+                      setForm({ ...form, location: loc.display_name });
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    {loc.display_name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Land Size */}
@@ -118,7 +157,7 @@ const Profile = () => {
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
               <Award className="w-4 h-4 text-primary" />
-              {t("profile.experience")}
+              {t("profile.experience") || "Farming Experience"}
             </Label>
             <RadioGroup
               value={form.experience}
@@ -132,11 +171,36 @@ const Profile = () => {
                 >
                   <RadioGroupItem value={level} id={level} />
                   <Label htmlFor={level} className="text-sm font-body text-foreground cursor-pointer">
-                    {t(`profile.exp.${level}`)}
+                    {t(`profile.exp.${level}`) || level}
                   </Label>
                 </div>
               ))}
             </RadioGroup>
+          </div>
+
+          {/* Weather */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
+              <Sun className="w-4 h-4 text-primary" />
+              {t("profile.weather") || "Current Weather Context"}
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              {(["Sunny", "Rainy", "Cloudy", "Windy"] as const).map((w) => (
+                <div
+                  key={w}
+                  onClick={() => setForm({ ...form, weather: w })}
+                  className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-colors ${
+                    form.weather === w ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/50'
+                  }`}
+                >
+                  {w === "Sunny" && <Sun className="w-4 h-4 text-amber-500" />}
+                  {w === "Rainy" && <CloudRain className="w-4 h-4 text-blue-500" />}
+                  {w === "Cloudy" && <Cloud className="w-4 h-4 text-slate-400" />}
+                  {w === "Windy" && <Wind className="w-4 h-4 text-teal-500" />}
+                  <span className="text-sm font-body text-foreground">{w}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Crops */}

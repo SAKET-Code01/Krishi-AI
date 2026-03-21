@@ -54,45 +54,25 @@ const KrishiInsight = () => {
 
   useEffect(() => {
     const fetchInsight = async () => {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       const fallbackText = insightFallbacks[language];
-
-      if (!apiKey || apiKey === "your_gemini_api_key_here") {
-        setInsight(fallbackText.mock);
-        setLoading(false);
-        return;
-      }
-
+      
       try {
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: `You are Krishi AI, a specialized smart farming assistant. Provide a one-sentence, highly practical farming tip in ${
+        const promptText = `You are Krishi AI, a specialized smart farming assistant. Provide a one-sentence, highly practical farming tip in ${
                         language === "or" ? "Odia" : language === "hi" ? "Hindi" : "English"
-                      } based on: Location: Bhubaneswar, Temp: 32°C, Weather: Partly Cloudy. Markets: Rice ₹2,150 (up), Wheat ₹2,340 (down). Give me today's pro farming tip.`,
-                    },
-                  ],
-                },
-              ],
-              generationConfig: {
-                maxOutputTokens: 100,
-                temperature: 0.7,
-              },
-            }),
+                      } based on: Location: Bhubaneswar, Temp: 32°C, Weather: Partly Cloudy. Markets: Rice ₹2,150 (up), Wheat ₹2,340 (down). Give me today's pro farming tip.`;
+
+        const response = await fetch("http://localhost:3001/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({ message: promptText }),
+        });
+
+        if (!response.ok) throw new Error("Backend error");
 
         const data = await response.json();
-        setInsight(data.candidates?.[0]?.content?.parts?.[0]?.text || fallbackText.default);
+        setInsight(data.text || fallbackText.default);
       } catch (error) {
         setInsight(fallbackText.error);
       } finally {
