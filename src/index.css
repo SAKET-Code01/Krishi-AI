@@ -75,9 +75,6 @@
 }
 
 @layer base {
-  html {
-    font-size: 115%; /* Scales entire UI including spacing and fonts up by 15% */
-  }
   * {
     @apply border-border;
   }
