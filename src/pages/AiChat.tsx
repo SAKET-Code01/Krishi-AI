@@ -176,7 +176,16 @@ const AiChat = () => {
       imageUrl: currentPreview || undefined,
     };
     
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [
+      ...prev, 
+      userMsg,
+      {
+        id: (Date.now() + 1).toString(),
+        text: "Connecting to server...",
+        sender: "ai",
+        timestamp: new Date()
+      }
+    ]);
     setInput("");
     setSelectedImage(null);
     setImagePreview(null);
@@ -251,7 +260,7 @@ const AiChat = () => {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: error.message || "Network issue detected. Please check your connection.",
+          text: "Server is waking up... please try again in 10 seconds.",
           sender: "ai",
           timestamp: new Date(),
           isError: true,
