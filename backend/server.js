@@ -24,7 +24,8 @@ const limiter = rateLimit({
 });
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -134,6 +135,37 @@ app.post('/api/chat', limiter, async (req, res) => {
 
   const defaultSystemPrompt = "You are Krishi AI, an expert agriculture assistant helping farmers with simple, practical, India-focused advice. Keep answers short, clear, and actionable.";
 
+  // 1. Try Local vLLM API first (OpenAI Compatible)
+  try {
+    const localResponse = await fetch("http://localhost:8000/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer local"
+      },
+      body: JSON.stringify({
+        "model": "Qwen/Qwen3-Coder-Next",
+        "messages": [
+          { "role": "system", "content": systemPrompt || defaultSystemPrompt },
+          { "role": "user", "content": message }
+        ],
+        "max_tokens": 500
+      })
+    });
+
+    if (localResponse.ok) {
+      const data = await localResponse.json();
+      const aiText = data.choices?.[0]?.message?.content;
+      if (aiText) {
+        console.log("Successfully served from Local vLLM");
+        return res.json({ text: aiText, success: true });
+      }
+    }
+  } catch (localError) {
+    console.log("Local vLLM not available, falling back to Groq API...");
+  }
+
+  // 2. Fallback to Groq API
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -195,47 +227,91 @@ app.post('/api/vision', async (req, res) => {
     });
   }
 
+  // 1. Try Local vLLM Vision API first (OpenAI Compatible)
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const localResponse = await fetch("http://localhost:8000/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer local"
+      },
+      body: JSON.stringify({
+        "model": "Qwen/Qwen2-VL-7B-Instruct", // Popular local VLM fallback
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              { "type": "text", "text": prompt },
+              { "type": "image_url", "image_url": { "url": `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
+            ]
+          }
+        ],
+        "max_tokens": 1000
+      })
+    });
+
+    if (localResponse.ok) {
+      const data = await localResponse.json();
+      const aiText = data.choices[0]?.message?.content || "{}";
+      console.log("Successfully served vision from Local vLLM");
+      return res.json({ text: aiText, success: true });
+    }
+  } catch (localError) {
+    console.log("Local vLLM Vision not available, falling back to Groq Vision API...");
+  }
+
+  // 2. Fallback to dual Hugging Face (Vision) + Groq (Text)
+  try {
+    const hfApiKey = process.env.HF_API_KEY;
+    if (!hfApiKey || hfApiKey === 'YOUR_HF_API_KEY_HERE') {
+        throw new Error("Missing HF API Key for fallback vision");
+    }
+
+    const imageBuffer = Buffer.from(imageBase64, 'base64');
+    
+    // Step A: Get visual classification from Hugging Face
+    const hfResponse = await fetch("https://api-inference.huggingface.co/models/google/vit-base-patch16-224", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${hfApiKey}`,
+        "Content-Type": "application/octet-stream"
+      },
+      body: imageBuffer,
+    });
+    
+    if (!hfResponse.ok) throw new Error("Hugging Face API Failure");
+    const hfData = await hfResponse.json();
+    const diseaseLabel = hfData?.[0]?.label || "Unknown Plant Condition";
+
+    // Step B: Use Groq Text API to construct the crop doctor JSON
+    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "llama-3.2-90b-vision-preview",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
           {
             "role": "user",
-            "content": [
-              {
-                "type": "text",
-                "text": prompt
-              },
-              {
-                "type": "image_url",
-                "image_url": {
-                  "url": `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`
-                }
-              }
-            ]
+            "content": `You are an expert agricultural AI. An image of a crop was analyzed and classified as: "${diseaseLabel}". ${prompt}`
           }
-        ]
+        ],
+        "response_format": { "type": "json_object" }
       })
     });
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Groq Vision Error:', errorData);
-        throw new Error('Groq Vision API failure');
+    if (!groqResponse.ok) {
+        throw new Error('Groq Text API failure during synthesis');
     }
 
-    const data = await response.json();
+    const data = await groqResponse.json();
     const aiText = data.choices[0]?.message?.content || "{}";
 
     res.json({ text: aiText, success: true });
   } catch (error) {
-    console.error('Vision error:', error);
+    console.error('Vision fallback error:', error);
     // Graceful fallback instead of crashing
     res.json({ 
       text: JSON.stringify({
@@ -266,8 +342,43 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
 
   try {
     const imageBuffer = fs.readFileSync(imageFilePath);
-    
-    // We send the buffer directly to HF Vision model
+    const imageBase64 = imageBuffer.toString('base64');
+    const prompt = req.body.prompt || "Analyze this image and identify any diseases, crop conditions, or context.";
+
+    // 1. Try Local vLLM Vision API first
+    try {
+      const localResponse = await fetch("http://localhost:8000/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer local"
+        },
+        body: JSON.stringify({
+          "model": "Qwen/Qwen2-VL-7B-Instruct",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                { "type": "text", "text": prompt },
+                { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${imageBase64}` } }
+              ]
+            }
+          ],
+          "max_tokens": 500
+        })
+      });
+
+      if (localResponse.ok) {
+        const data = await localResponse.json();
+        const aiText = data.choices[0]?.message?.content;
+        console.log("Successfully served analyze-image from Local vLLM");
+        return res.json({ text: aiText, success: true, predictions: [{ label: "Local Vision Output", score: 1.0 }] });
+      }
+    } catch (localError) {
+      console.log("Local vLLM Vision not available for analyze-image, falling back to Hugging Face API...");
+    }
+
+    // 2. Fallback to Hugging Face API for raw image classification
     const response = await fetch("https://api-inference.huggingface.co/models/google/vit-base-patch16-224", {
       method: "POST",
       headers: {
