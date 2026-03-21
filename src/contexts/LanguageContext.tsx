@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 export type Language = "en" | "hi" | "or";
 
@@ -142,9 +142,10 @@ const translations: Translations = {
   "weather.sat": { en: "Sat", hi: "शनि", or: "ଶନି" },
   "weather.sun": { en: "Sun", hi: "रवि", or: "ରବି" },
   "weather.sunny": { en: "Sunny", hi: "धूप", or: "ଖରା" },
-  "weather.rainy": { en: "Rain", hi: "बारिश", or: "ବର୍ଷା" },
+  "weather.rainy": { en: "Rainy", hi: "बारिश", or: "ବର୍ଷା" },
   "weather.heavyRain": { en: "Heavy Rain", hi: "भारी बारिश", or: "ପ୍ରବଳ ବର୍ଷା" },
   "weather.cloudy": { en: "Cloudy", hi: "बादल", or: "ମେଘୁଆ" },
+  "weather.windy": { en: "Windy", hi: "हवादार", or: "ପବନିଆ" },
   "weather.location": { en: "Bhubaneswar", hi: "भुवनेश्वर", or: "ଭୁବନେଶ୍ୱର" },
   "weather.advice.rain": { en: "Heavy rain expected on Wednesday. Delay fertilizer application.", hi: "बुधवार को भारी बारिश की संभावना। खाद डालने में देरी करें।", or: "ବୁଧବାର ପ୍ରବଳ ବର୍ଷା ସମ୍ଭାବନା | ସାର ପ୍ରୟୋଗ ବିଳମ୍ବ କରନ୍ତୁ |" },
   "weather.advice.rice": { en: "Good conditions for transplanting rice seedlings on Thursday after rain.", hi: "बारिश के बाद गुरुवार को धान के पौधे रोपने के लिए अच्छी स्थिति।", or: "ବର୍ଷା ପରେ ଗୁରୁବାର ଧାନ ଚାରା ରୋପଣ ପାଇଁ ଭଲ ସମୟ |" },
@@ -286,6 +287,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     setLanguage(lang);
     localStorage.setItem("krishi-lang", lang);
   };
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const t = (key: string): string => {
     return translations[key]?.[language] || translations[key]?.["en"] || key;

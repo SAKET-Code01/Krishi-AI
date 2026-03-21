@@ -197,7 +197,7 @@ const Profile = () => {
                   {w === "Rainy" && <CloudRain className="w-4 h-4 text-blue-500" />}
                   {w === "Cloudy" && <Cloud className="w-4 h-4 text-slate-400" />}
                   {w === "Windy" && <Wind className="w-4 h-4 text-teal-500" />}
-                  <span className="text-sm font-body text-foreground">{w}</span>
+                  <span className="text-sm font-body text-foreground">{t(`weather.${w.toLowerCase()}`)}</span>
                 </div>
               ))}
             </div>

@@ -3,11 +3,11 @@ import { ArrowLeft, PieChart as PieChartIcon, TrendingUp, Lightbulb, Droplets, S
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import BottomNav from "@/components/BottomNav";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, LineChart, Line, XAxis } from "recharts";
 
 const Reports = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
   const profile = JSON.parse(localStorage.getItem("krishi-ai-profile") || "{}");
   
@@ -24,6 +24,24 @@ const Reports = () => {
   ];
 
   const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))"];
+
+  const projectedProfit = landSize * 45000;
+  
+  const currentMonthIndex = new Date().getMonth();
+  const getLocalizedMonth = (offset: number) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + offset);
+    return new Intl.DateTimeFormat(language === "or" ? "or-IN" : language === "hi" ? "hi-IN" : "en-US", { month: "short" }).format(d);
+  };
+  
+  const financialData = [
+    { name: getLocalizedMonth(-5), value: projectedProfit * 0.4 },
+    { name: getLocalizedMonth(-4), value: projectedProfit * 0.6 },
+    { name: getLocalizedMonth(-3), value: projectedProfit * 0.5 },
+    { name: getLocalizedMonth(-2), value: projectedProfit * 0.8 },
+    { name: getLocalizedMonth(-1), value: projectedProfit * 0.75 },
+    { name: getLocalizedMonth(0), value: projectedProfit },
+  ];
 
 const getRegionalCrops = (location: string = "", experience: string = "beginner") => {
   const loc = (location || "").toLowerCase();
@@ -323,7 +341,7 @@ const getRegionalCrops = (location: string = "", experience: string = "beginner"
               <div className="flex justify-between items-end">
                 <div>
                   <p className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-widest mb-1">{t("reports.profit.est")}</p>
-                  <p className="text-3xl font-display font-black text-foreground">₹{landSize * 45000}</p>
+                  <p className="text-3xl font-display font-black text-foreground">₹{projectedProfit.toLocaleString()}</p>
                 </div>
                 <div className="text-right">
                   <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
@@ -333,17 +351,35 @@ const getRegionalCrops = (location: string = "", experience: string = "beginner"
                 </div>
               </div>
               
-              {/* Mock Sparkline */}
-              <div className="h-16 w-full opacity-30">
-                <svg className="w-full h-full" viewBox="0 0 100 20">
-                  <path
-                    d="M0 15 Q 10 10, 20 12 T 40 8 T 60 14 T 80 6 T 100 10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-primary"
-                  />
-                </svg>
+              <div className="h-32 w-full mt-2 -ml-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={financialData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: '#888888', fontSize: 10, fontWeight: 600 }}
+                      dy={10}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={4} 
+                      dot={false}
+                    />
+                    <RechartsTooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                        borderRadius: '8px', 
+                        border: 'none',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                      formatter={(value: number) => [`₹${value.toLocaleString()}`, t("reports.profit.est")]}
+                      labelFormatter={() => ''}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
 
               <p className="text-xs font-body text-muted-foreground leading-relaxed">{t("reports.profit.desc")}</p>
