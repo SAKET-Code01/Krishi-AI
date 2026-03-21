@@ -121,12 +121,13 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
   }
 });
 
-app.post('/api/chat', limiter, async (req, res) => {
-  console.log("Incoming request:", req.body);
+app.post('/api/chat', limiter, upload.single('image'), async (req, res) => {
+  const imageFilePath = req.file?.path;
   const { message, systemPrompt } = req.body;
 
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
+  if (!message && !imageFilePath) {
+    if (imageFilePath) safeUnlink(imageFilePath);
+    return res.status(400).json({ error: 'Message or image is required' });
   }
 
   if (!process.env.GROQ_API_KEY) {
@@ -168,6 +169,26 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
 
 
   try {
+    if (imageFilePath) {
+      // Vision processing fallback
+      const hfKey = process.env.HF_API_KEY;
+      const imageBuffer = fs.readFileSync(imageFilePath);
+      const hfResponse = await fetch("https://api-inference.huggingface.co/models/google/vit-base-patch16-224", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${hfKey}`,
+          "Content-Type": "application/octet-stream"
+        },
+        body: imageBuffer,
+      });
+
+      if (!hfResponse.ok) throw new Error("Hugging Face vision service failed");
+      const hfData = await hfResponse.json();
+      const topPrediction = hfData?.[0]?.label || "Plant";
+      res.json({ text: `This image appears to be: **${topPrediction}**. How else can I help with this crop?`, success: true });
+      return;
+    }
+
     console.log("Calling AI API...");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -206,112 +227,187 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
     return res.status(500).json({
       error: "AI service failed"
     });
+  } finally {
+    if (imageFilePath) safeUnlink(imageFilePath);
   }
 });
 
-app.post('/api/vision', async (req, res) => {
-  console.log('\n[API/VISION] Request received.');
-  const { prompt, imageBase64, mimeType } = req.body;
+// Main analyze endpoint for Crop Doc using FormData and Multer
+app.post('/api/analyze', limiter, upload.single('image'), async (req, res) => {
+  const imageFilePath = req.file?.path;
 
-  if (!prompt || !imageBase64) {
-    console.error('[API/VISION] Error: Prompt or image missing');
-    return res.status(400).json({ error: 'Prompt and image are required' });
+  if (!imageFilePath) {
+    return res.status(400).json({ error: 'Image file is required' });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  const hfKey = process.env.HF_API_KEY;
 
-  if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') {
-    console.error('[API/VISION] Error: GROQ_API_KEY is missing.');
-    return res.status(500).json({ error: 'Missing GROQ_API_KEY. Please configure in Render environment.' });
-  }
-
-  // 1. Try Local vLLM Vision API first (OpenAI Compatible)
-  try {
-    const localResponse = await fetch("http://localhost:8000/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer local"
-      },
-      body: JSON.stringify({
-        "model": "Qwen/Qwen2-VL-7B-Instruct", // Popular local VLM fallback
-        "messages": [
-          {
-            "role": "user",
-            "content": [
-              { "type": "text", "text": prompt },
-              { "type": "image_url", "image_url": { "url": `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
-            ]
-          }
-        ],
-        "max_tokens": 1000
-      })
+  if (!hfKey || hfKey === 'YOUR_HF_API_KEY_HERE') {
+    safeUnlink(imageFilePath);
+    return res.json({ 
+      text: JSON.stringify({
+        disease: "Unable to analyze (HF API key missing)",
+        confidence: 0,
+        symptoms: ["Please configure HF_API_KEY in backend/.env"],
+        treatment: ["Contact support or add your API key"],
+        fertilizers: []
+      }), 
+      success: false 
     });
-
-    if (localResponse.ok) {
-      const data = await localResponse.json();
-      const aiText = data.choices[0]?.message?.content || "{}";
-      console.log("Successfully served vision from Local vLLM");
-      return res.json({ text: aiText, success: true });
-    }
-  } catch (localError) {
-    console.log("Local vLLM Vision not available, falling back to Groq Vision API...");
   }
 
-  // 2. Fallback to dual Hugging Face (Vision) + Groq (Text)
   try {
-    const hfApiKey = process.env.HF_API_KEY;
-    if (!hfApiKey || hfApiKey === 'YOUR_HF_API_KEY_HERE') {
-        throw new Error("Missing HF API Key for fallback vision");
+    const imageBuffer = fs.readFileSync(imageFilePath);
+
+    // Step 1: Plant disease classification via Hugging Face
+    // We pass the raw binary Buffer explicitly
+    const hfResponse = await fetch(
+      "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${hfKey}`,
+          "Content-Type": "application/octet-stream",
+        },
+        body: imageBuffer,
+      }
+    );
+
+    if (!hfResponse.ok) {
+      const errText = await hfResponse.text();
+      console.error("HF API error:", hfResponse.status, errText);
+      throw new Error(`Hugging Face API failure: ${hfResponse.status}`);
     }
 
-    const imageBuffer = Buffer.from(imageBase64, 'base64');
-    
-    // Step A: Get visual classification from Hugging Face
-    const hfResponse = await fetch("https://api-inference.huggingface.co/models/google/vit-base-patch16-224", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${hfApiKey}`,
-        "Content-Type": "application/octet-stream"
-      },
-      body: imageBuffer,
-    });
-    
-    if (!hfResponse.ok) throw new Error("Hugging Face API Failure");
     const hfData = await hfResponse.json();
-    const diseaseLabel = hfData?.[0]?.label || "Unknown Plant Condition";
+    console.log("HF Plant Disease Results:", JSON.stringify(hfData?.slice(0, 3)));
 
-    // Step B: Use Groq Text API to construct the crop doctor JSON
-    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-          {
-            "role": "user",
-            "content": `You are an expert agricultural AI. An image of a crop was analyzed and classified as: "${diseaseLabel}". ${prompt}`
-          }
-        ],
-        "response_format": { "type": "json_object" }
-      })
-    });
-
-    if (!groqResponse.ok) {
-        throw new Error('Groq Text API failure during synthesis');
+    if (!hfData || !Array.isArray(hfData) || hfData.length === 0) {
+      return res.json({
+        text: JSON.stringify({
+          disease: "Unable to classify image",
+          confidence: 0,
+          isNonCrop: false,
+          symptoms: ["The model could not classify this image"],
+          treatment: ["Please upload a clearer image of a crop leaf"],
+          fertilizers: []
+        }),
+        success: false
+      });
     }
 
-    const data = await groqResponse.json();
-    const aiText = data.choices[0]?.message?.content || "{}";
+    const topLabel = hfData[0]?.label || "";
+    const topScore = Math.round((hfData[0]?.score || 0) * 100);
+    const allLabels = hfData.slice(0, 5).map(p => `${p.label} (${Math.round(p.score * 100)}%)`).join(", ");
+
+    // Step 2: Non-crop detection
+    const plantKeywords = [
+      'tomato', 'potato', 'apple', 'corn', 'maize', 'grape', 'cherry',
+      'peach', 'pepper', 'strawberry', 'squash', 'soybean', 'rice',
+      'wheat', 'citrus', 'orange', 'leaf', 'plant', 'crop', 'healthy',
+      'blight', 'rust', 'mold', 'rot', 'spot', 'scab', 'wilt', 'mosaic',
+      'mildew', 'bacterial', 'fungal', 'virus'
+    ];
+
+    const isPlantRelated = hfData.some(pred => {
+      const label = pred.label.toLowerCase();
+      return plantKeywords.some(kw => label.includes(kw)) && pred.score > 0.05;
+    });
+
+    if (!isPlantRelated || topScore < 10) {
+      return res.json({
+        text: JSON.stringify({
+          disease: "Not a crop image",
+          confidence: 0,
+          isNonCrop: true,
+          symptoms: ["The uploaded image does not appear to be a crop or plant"],
+          treatment: ["Please upload a clear image of a crop leaf for disease analysis"],
+          fertilizers: []
+        }),
+        success: true
+      });
+    }
+
+    // Step 3: Send classification context to Groq for structured diagnosis
+    let aiText = "{}";
+    if (groqKey && groqKey !== 'YOUR_GROQ_API_KEY_HERE') {
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${groqKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "model": "llama-3.3-70b-versatile",
+          "messages": [
+            {
+              "role": "system",
+              "content": `You are an expert agricultural crop disease analyst. A plant image was analyzed by an AI classifier. The top predictions were: ${allLabels}. 
+
+Based on these classifications, provide a JSON response with this exact format:
+{
+  "disease": "Name of the disease or 'Healthy' if the plant appears healthy",
+  "confidence": ${topScore},
+  "isHealthy": true/false,
+  "explanation": "Brief plain-English explanation of what this disease/condition means",
+  "symptoms": ["symptom 1", "symptom 2", "symptom 3"],
+  "treatment": ["treatment step 1", "treatment step 2", "treatment step 3"],
+  "fertilizers": ["recommended fertilizer 1", "recommended fertilizer 2"],
+  "suggestion": "One practical actionable tip for the farmer"
+}
+
+Rules:
+- If the label contains "healthy" → isHealthy: true, disease: "Healthy Plant"
+- Clean up the label into a human-readable disease name (e.g., "Tomato___Late_blight" → "Late Blight")
+- Include the crop name in the disease field (e.g., "Tomato - Late Blight")
+- Give safe, practical treatment advice suitable for Indian farmers
+- If confidence is below 60, add a note in explanation that the result is uncertain
+- Never give harmful or dangerous advice
+- Respond ONLY with valid JSON, no markdown`
+            }
+          ],
+          "response_format": { "type": "json_object" }
+        })
+      });
+
+      if (groqResponse.ok) {
+        const groqData = await groqResponse.json();
+        aiText = groqData.choices[0]?.message?.content || "{}";
+      } else {
+        console.error("Groq fallback failed:", await groqResponse.text());
+        throw new Error("Groq API failed");
+      }
+    } else {
+      // Fallback if no Groq Key but HF worked
+      aiText = JSON.stringify({
+        disease: topLabel.replace(/___/g, " - ").replace(/_/g, " "),
+        confidence: topScore,
+        isHealthy: topLabel.toLowerCase().includes("healthy"),
+        explanation: "Analyzed visually by AI.",
+        symptoms: [],
+        treatment: ["Please consult an agricultural expert based on this visual diagnosis."],
+        fertilizers: [],
+        suggestion: "Monitor crop daily."
+      });
+    }
 
     console.log('[API/VISION] Successfully processed vision request via Groq synthesis.');
     res.json({ text: aiText, success: true });
   } catch (error) {
-    console.error('[API/VISION] Vision fallback error:', error);
-    res.status(502).json({ error: `Vision Service Error: ${error.message}` });
+    console.error('Vision analysis error:', error);
+    res.json({ 
+      text: JSON.stringify({
+        disease: "Analysis temporarily unavailable",
+        confidence: 0,
+        symptoms: ["The image analysis service is temporarily unavailable"],
+        treatment: ["Please try again in a few moments", "As a general measure, check for leaf discoloration or spots"],
+        fertilizers: ["Organic compost", "Balanced NPK fertilizer"]
+      }), 
+      success: false 
+    });
+  } finally {
+    safeUnlink(imageFilePath); // Clean up the uploaded file
   }
 });
 
@@ -400,7 +496,54 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
   }
 });
 
+function getMockData() {
+return [
+{ crop: "Rice", market: "Cuttack Mandi (Mock)", price: 2150, change: 3.2, trend: "up" },
+{ crop: "Wheat", market: "Sambalpur Mandi (Mock)", price: 2340, change: -1.5, trend: "down" },
+{ crop: "Mustard", market: "Balasore Mandi (Mock)", price: 5200, change: 5.1, trend: "up" },
+{ crop: "Onion", market: "Bhubaneswar Mandi (Mock)", price: 1800, change: -8.3, trend: "down" },
+{ crop: "Tomato", market: "Puri Mandi (Mock)", price: 2600, change: 12.0, trend: "up" },
+{ crop: "Potato", market: "Cuttack Mandi (Mock)", price: 1200, change: 0.5, trend: "up" },
+{ crop: "Green Gram", market: "Berhampur Mandi (Mock)", price: 7100, change: 2.8, trend: "up" },
+{ crop: "Sugarcane", market: "Balasore Mandi (Mock)", price: 350, change: -0.3, trend: "down" }
+];
+}
+
+app.get('/api/market-prices', limiter, async (req, res) => {
+try {
+const apiKey = process.env.DATA_GOV_IN_API_KEY;
+if (!apiKey) {
+return res.json({ success: true, data: getMockData() });
+}
+
+```
+const response = await fetch(`https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=25`);
+const data = await response.json();
+
+if (!data.records) {
+  return res.json({ success: true, data: getMockData() });
+}
+
+const formattedData = data.records.map(record => ({
+  crop: record.commodity || "Unknown",
+  market: record.market,
+  price: parseFloat(record.modal_price) || 0,
+  change: 0,
+  trend: "up"
+}));
+
+res.json({ success: true, data: formattedData });
+```
+
+} catch (error) {
+console.error(error);
+res.json({ success: true, data: getMockData() });
+}
+});
+
+// ✅ IMPORTANT: keep YOUR port (Render correct)
 const PORT = Number(process.env.PORT) || 10000;
+
 app.listen(PORT, () => {
   console.log(`[SYSTEM] Backend running on port ${PORT}`);
   

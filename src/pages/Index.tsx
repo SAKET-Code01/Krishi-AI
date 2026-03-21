@@ -13,6 +13,7 @@ import {
   Users,
   Sparkles,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 import heroImage from "@/assets/hero-farming.jpg";
 import logo from "@/assets/krishi-logo.png";
@@ -35,7 +36,7 @@ const Index = () => {
   const { t } = useLanguage();
 
   const features = [
-    { icon: Mic, title: t("feat.voiceAI"), description: t("feat.voiceAI.desc"), path: "/voice-assistant", gradient: true },
+    { icon: MessageSquare, title: t("feat.voiceAI"), description: t("feat.voiceAI.desc"), path: "/ai-chat", gradient: true },
     { icon: Stethoscope, title: t("feat.cropDoc"), description: t("feat.cropDoc.desc"), path: "/crop-doctor" },
     { icon: CloudSun, title: t("feat.weather"), description: t("feat.weather.desc"), path: "/weather" },
     { icon: TrendingUp, title: t("feat.market"), description: t("feat.market.desc"), path: "/market" },
@@ -115,7 +116,7 @@ const Index = () => {
                 onClick={() => navigate("/login")}
                 className="flex items-center justify-center gap-2.5 px-6 md:px-7 py-3.5 md:py-4 rounded-xl gradient-hero text-primary-foreground font-display font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-shadow"
               >
-                <Mic className="w-5 h-5" />
+                <MessageSquare className="w-5 h-5" />
                 {t("hero.talkBtn")}
               </motion.button>
               <motion.button
