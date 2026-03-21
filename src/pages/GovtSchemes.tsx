@@ -16,6 +16,7 @@ const GovtSchemes = () => {
       amount: "₹6,000/year",
       desc: "Direct income support of ₹6,000 per year to eligible farmer families in three installments.",
       icon: IndianRupee,
+      url: "https://pmkisan.gov.in/",
     },
     {
       id: 2,
@@ -24,6 +25,7 @@ const GovtSchemes = () => {
       amount: "Up to full coverage",
       desc: "Crop insurance scheme covering natural calamities, pests, and diseases.",
       icon: Shield,
+      url: "https://pmfby.gov.in/",
     },
     {
       id: 3,
@@ -32,6 +34,7 @@ const GovtSchemes = () => {
       amount: "Up to ₹3 lakh",
       desc: "Short-term credit for crop production with subsidized interest rate of 4%.",
       icon: IndianRupee,
+      url: "https://www.pmjdy.gov.in/scheme",
     },
     {
       id: 4,
@@ -40,6 +43,7 @@ const GovtSchemes = () => {
       amount: "Free",
       desc: "Free soil testing and health card with crop-wise fertilizer recommendations.",
       icon: Sprout,
+      url: "https://soilhealth.dac.gov.in/",
     },
     {
       id: 5,
@@ -48,6 +52,7 @@ const GovtSchemes = () => {
       amount: "₹10,000/season",
       desc: "Financial assistance to small farmers for cultivation in Odisha.",
       icon: IndianRupee,
+      url: "https://kalia.odisha.gov.in/",
     },
   ];
 
@@ -102,12 +107,14 @@ const GovtSchemes = () => {
                 <p className="font-display font-bold text-primary text-sm">{scheme.amount}</p>
               </div>
               <p className="text-sm font-body text-muted-foreground mt-2">{scheme.desc}</p>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                className="mt-3 flex items-center gap-1 text-sm font-display font-semibold text-primary"
+              <a
+                href={scheme.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-display font-semibold text-primary hover:underline transition-colors"
               >
                 {t("schemes.check")} <ExternalLink className="w-3.5 h-3.5" />
-              </motion.button>
+              </a>
             </motion.div>
           );
         })}
