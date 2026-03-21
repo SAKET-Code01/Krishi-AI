@@ -16,9 +16,19 @@ dist-ssr
 backend/uploads/
 *.local
 
+# Agent Artifacts
+.agents/
+.agent/
+_agents/
+_agent/
+tmp/
+.temp/
+.gemini/
+.vercel/
+
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
+! .vscode/extensions.json
 .idea
 .DS_Store
 *.suo

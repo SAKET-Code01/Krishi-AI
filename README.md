@@ -1,104 +1,91 @@
-# Krishi AI
+# Krishi AI - Smart Agriculture Platform 🌾
 
-Krishi AI is a smart farming project with a React frontend and an Express backend. The app includes crop diagnosis, market prices, weather information, farmer profile storage, reports, and voice-assistant experiments.
+Krishi AI is a comprehensive digital ecosystem designed to empower farmers with AI-driven insights, real-time data, and traditional wisdom.
 
-## Tech Stack
+## 🚀 Key Features
 
-- React
-- Vite
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Express
-- Gemini API
-- Google Cloud Speech-to-Text / Text-to-Speech
+- **Intelligent Crop Doctor**: Upload leaf images to diagnose diseases using advanced Hugging Face vision models. Rejects non-crop images and provides structured treatment advice.
+- **AI Agriculture Chat**: Multi-lingual (Hindi, Odia, English) chat assistant for practical farming guidance, powered by Groq and Llama 3.
+- **Live Mandi Prices**: Real-time market data from `Data.gov.in` with state and district filtering.
+- **Weather & Forecast**: Hyper-local weather updates to plan harvesting and irrigation.
+- **Voice Assistant**: Specialized support for regional Odia-speaking farmers using Google Cloud STT/TTS.
+- **Government Schemes**: Curated list of agricultural schemes with direct links to official applications.
 
-## Project Structure
+## 🛠️ Tech Stack
+
+- **Frontend**: React, Vite, TypeScript, Tailwind CSS, Framer Motion, Lucide Icons.
+- **Backend**: Node.js, Express, Multer (file handling).
+- **AI/ML**: Groq (Llama 3), Hugging Face (Vision), Gemini API.
+- **Services**: Google Cloud (Speech-to-Text & Text-to-Speech), Data.gov.in API.
+
+## 📦 Project Structure
 
 ```text
 .
-|- src/          Frontend source
-|- public/       Static assets
-|- backend/      Express backend
-|- index.html    Frontend entry HTML
+├── src/            # Frontend Source (React Components, Pages, Contexts)
+├── public/         # Static assets
+├── backend/        # Express Server
+│   ├── server.js   # Main API logic
+│   └── uploads/    # Temporary image storage (Git ignored)
+└── README.md
 ```
 
-## Prerequisites
+## ⚙️ Setup & Installation
 
+### 1. Prerequisites
 - Node.js 18+
-- npm
-- A Gemini API key
-- Google Cloud credentials if you want to use the backend audio endpoint
+- API Keys for: Groq, Hugging Face, Gemini, and Data.gov.in.
 
-## Environment Setup
+### 2. Environment Variables
 
-Copy the example file and add your local values:
-
-```sh
-cp .env.example .env
+Create a `.env` file in the **backend** directory:
+```env
+GROQ_API_KEY=your_key
+HF_API_KEY=your_key
+GEMINI_API_KEY=your_key
+DATA_GOV_IN_API_KEY=your_key
+PORT=3001
 ```
 
-Required variables:
+Create a `.env` file in the **root** directory:
+```env
+VITE_GEMINI_API_KEY=your_key
+```
 
-- `VITE_GEMINI_API_KEY` for frontend Gemini requests
-- `GEMINI_API_KEY` for backend Gemini requests
-- `PORT` for the backend server
+### 3. Installation
 
-Do not commit your real `.env` file.
-
-## Install
-
-Frontend:
-
+**Frontend:**
 ```sh
 npm install
 ```
 
-Backend:
-
+**Backend:**
 ```sh
 cd backend
 npm install
 ```
 
-## Run Locally
+### 4. Running Locally
 
-Frontend:
-
-```sh
-npm run dev
-```
-
-Backend:
-
+**Start Backend (Port 3001):**
 ```sh
 cd backend
 npm run dev
 ```
 
-## Quality Checks
-
-Frontend checks:
-
+**Start Frontend (Vite):**
 ```sh
-npm run lint
-npm run test
-npm run build
+npm run dev
 ```
 
-Backend currently has no automated tests.
+## 📜 Development Notes
+- The **Crop Doctor** uses `FormData` for binary image transmission to ensure high accuracy.
+- **Local Fallback**: If `Data.gov.in` keys aren't provided, the app serves high-fidelity mock data for demonstration.
 
-## Notes
-
-- The frontend currently uses Gemini directly from the browser.
-- The backend exposes an audio-processing endpoint at `/api/process-audio`.
-- Uploaded backend audio files are treated as runtime artifacts and should not be committed.
-
-## Contributors
-
--Saket Kumar Seth
--Debojeet 
--Subhadeep Sharma
--Subhra Padhy
--Aditya Kumar Dutta
--Kritika Sahoo
+## 👥 Contributors
+- Saket Kumar Seth
+- Debojeet
+- Subhadeep Sharma
+- Subhra Padhy
+- Aditya Kumar Dutta
+- Kritika Sahoo
