@@ -13,6 +13,7 @@ dotenv.config(); // Loads backend/.env
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') }); // Fallback to root .env if needed
 
 const app = express();
+app.set('trust proxy', 1); // Respect Render's reverse proxy for real IP extraction
 const uploadsDir = path.join(__dirname, 'uploads');
 
 const limiter = rateLimit({
@@ -399,7 +400,7 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
   }
 });
 
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = Number(process.env.PORT) || 10000;
 app.listen(PORT, () => {
   console.log(`[SYSTEM] Backend running on port ${PORT}`);
   
