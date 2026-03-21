@@ -57,9 +57,9 @@ const Index = () => {
             className="sticky top-4 z-50 flex items-center justify-between mb-16 p-4 rounded-2xl bg-background/20 backdrop-blur-md border border-primary-foreground/10 shadow-lg"
           >
             <div className="flex items-center gap-2 group cursor-pointer">
-              <motion.img 
+              <motion.img
                 whileHover={{ rotate: 15, scale: 1.1 }}
-                src={logo} alt="Krishi AI" className="w-10 h-10 transition-transform" 
+                src={logo} alt="Krishi AI" className="w-10 h-10 transition-transform"
               />
               <span className="font-display font-bold text-xl text-primary-foreground group-hover:text-primary transition-colors">Krishi AI</span>
             </div>
@@ -90,10 +90,10 @@ const Index = () => {
               <Leaf className="w-4 h-4 text-primary animate-bounce-slow" />
               <span className="text-sm font-display font-semibold text-primary">{t("hero.badge")}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-display font-extrabold text-primary-foreground leading-tight mb-4">
+            <h1 className="text-4xl md:text-6xl font-display font-extrabold text-primary-foreground leading-tight mb-4 drop-shadow-md">
               {t("hero.title1")} <span className="text-primary">{t("hero.title2")}</span>
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/80 font-body leading-relaxed mb-8 max-w-lg">
+            <p className="text-lg md:text-xl text-primary-foreground font-display font-bold leading-relaxed mb-8 max-w-lg drop-shadow-sm">
               {t("hero.desc")}
             </p>
             <div className="flex flex-wrap gap-3">
@@ -107,8 +107,8 @@ const Index = () => {
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border-2 border-primary-foreground/20 text-primary-foreground font-display font-semibold text-base hover:bg-primary-foreground/20 transition-colors"
+                onClick={() => navigate("/profile")}
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/20 backdrop-blur-md border-2 border-white/30 text-primary-foreground font-display font-bold text-base hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 shadow-lg"
               >
                 {t("hero.exploreBtn")}
                 <ArrowRight className="w-4 h-4" />

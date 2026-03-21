@@ -21,7 +21,7 @@ const translations: Translations = {
     or: "AI ଫସଲ ମାର୍ଗଦର୍ଶନ, ଆପଣଙ୍କ ଭାଷାରେ ଭଏସ ଆସିଷ୍ଟାଣ୍ଟ, ରୋଗ ଚିହ୍ନଟ, ବଜାର ଦର — ଚାଷୀଙ୍କ ପାଇଁ ସବୁକିଛି।",
   },
   "hero.talkBtn": { en: "Talk to AI Assistant", hi: "AI असिस्टेंट से बात करें", or: "AI ଆସିଷ୍ଟାଣ୍ଟଙ୍କ ସହ କଥା ହୁଅନ୍ତୁ" },
-  "hero.exploreBtn": { en: "Explore Dashboard", hi: "डैशबोर्ड देखें", or: "ଡ୍ୟାସବୋର୍ଡ ଦେଖନ୍ତୁ" },
+  "hero.exploreBtn": { en: "Get Started", hi: "शुरू करें", or: "ଆରମ୍ଭ କରନ୍ତୁ" },
   "hero.dashboard": { en: "Dashboard", hi: "डैशबोर्ड", or: "ଡ୍ୟାସବୋର୍ଡ" },
   "features.title": { en: "Everything You Need", hi: "आपको जो चाहिए सब कुछ", or: "ଆପଣଙ୍କୁ ଯାହା ଦରକାର ସବୁ" },
   "features.subtitle": {
