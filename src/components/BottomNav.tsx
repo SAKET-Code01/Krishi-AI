@@ -17,7 +17,7 @@ const BottomNav = () => {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-border pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-nav pb-safe">
       <div className="flex items-end justify-around px-2 pt-2 pb-3 max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -32,7 +32,7 @@ const BottomNav = () => {
               >
                 <motion.div
                   whileTap={{ scale: 0.9 }}
-                  className="w-16 h-16 rounded-full gradient-hero flex items-center justify-center animate-pulse-glow"
+                  className="w-16 h-16 rounded-full gradient-hero flex items-center justify-center shadow-lg animate-gentle-ring"
                 >
                   <Icon className="w-7 h-7 text-primary-foreground" />
                 </motion.div>
@@ -47,20 +47,37 @@ const BottomNav = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1 min-w-[56px]"
+              className="flex flex-col items-center gap-1 min-w-[56px] group"
             >
-              <div className={`p-2 rounded-xl transition-colors ${isActive ? "bg-primary/10" : ""}`}>
+              <motion.div
+                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                className={`p-2 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-primary/12 shadow-sm"
+                    : "group-hover:bg-muted/60"
+                }`}
+              >
                 <Icon
-                  className={`w-5 h-5 transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                  className={`w-5 h-5 transition-colors duration-200 ${
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  }`}
                 />
-              </div>
+              </motion.div>
               <span
-                className={`text-xs font-display font-medium transition-colors ${
-                  isActive ? "text-primary" : "text-muted-foreground"
+                className={`text-[11px] font-display font-medium transition-colors duration-200 ${
+                  isActive ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
                 {t(item.labelKey)}
               </span>
+              {isActive && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="w-1 h-1 rounded-full bg-primary"
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
             </button>
           );
         })}

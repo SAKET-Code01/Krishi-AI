@@ -11,17 +11,17 @@ interface DashboardCardProps {
 }
 
 const variantStyles = {
-  default: "bg-card border-2 border-border",
-  primary: "bg-primary/5 border-2 border-primary/20",
-  secondary: "bg-secondary/5 border-2 border-secondary/20",
-  accent: "bg-accent/10 border-2 border-accent/30",
+  default: "bg-card border border-border/60",
+  primary: "bg-primary/5 border border-primary/15",
+  secondary: "bg-secondary/5 border border-secondary/15",
+  accent: "bg-accent/8 border border-accent/20",
 };
 
 const iconStyles = {
   default: "bg-muted text-foreground",
-  primary: "bg-primary/10 text-primary",
-  secondary: "bg-secondary/10 text-secondary",
-  accent: "bg-accent/20 text-accent",
+  primary: "bg-primary/12 text-primary",
+  secondary: "bg-secondary/12 text-secondary",
+  accent: "bg-accent/15 text-accent",
 };
 
 const DashboardCard = ({
@@ -34,17 +34,18 @@ const DashboardCard = ({
 }: DashboardCardProps) => {
   return (
     <motion.div
+      whileHover={{ y: -2 }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`rounded-xl p-4 shadow-card cursor-pointer ${variantStyles[variant]}`}
+      className={`rounded-xl p-4 cursor-pointer card-hover-glow transition-all duration-200 group ${variantStyles[variant]}`}
     >
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${iconStyles[variant]}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-transform duration-200 group-hover:scale-110 ${iconStyles[variant]}`}>
         <Icon className="w-5 h-5" />
       </div>
-      <p className="text-sm font-body text-muted-foreground">{title}</p>
-      <p className="text-xl font-display font-bold text-foreground mt-1">{value}</p>
+      <p className="text-xs font-display font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+      <p className="text-xl font-display font-bold text-foreground mt-0.5">{value}</p>
       {subtitle && (
-        <p className="text-xs font-body text-muted-foreground mt-1">{subtitle}</p>
+        <p className="text-[11px] font-body text-muted-foreground mt-1">{subtitle}</p>
       )}
     </motion.div>
   );

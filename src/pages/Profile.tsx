@@ -59,17 +59,21 @@ const Profile = () => {
     }, 1500);
   };
 
+  const initials = form.name
+    ? form.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "KA";
+
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen bg-mesh pb-28">
       {/* Header */}
-      <div className="bg-card border-b-2 border-border px-4 py-4">
+      <div className="bg-card/80 backdrop-blur-md border-b border-border/40 px-4 py-4 sticky top-0 z-30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted">
+            <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <div>
-              <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+              <h1 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
                 <User className="w-5 h-5 text-primary" />
                 {t("profile.title")}
               </h1>
@@ -86,111 +90,156 @@ const Profile = () => {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          {/* Name */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <User className="w-4 h-4 text-primary" />
-              {t("profile.name")}
-            </Label>
-            <Input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder={t("profile.namePlaceholder")}
-              maxLength={100}
-              className="rounded-xl border-2 border-border bg-card h-12 text-base font-body"
-            />
-          </div>
-
-          {/* Location */}
-          <div className="space-y-2 relative">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <MapPin className="w-4 h-4 text-primary" />
-              {t("profile.location") || "Location"}
-            </Label>
-            <Input
-              value={form.location}
-              onChange={(e) => handleLocationChange(e.target.value)}
-              onFocus={() => {
-                if (locationSuggestions.length > 0) setShowSuggestions(true);
-              }}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              placeholder={t("profile.locationPlaceholder") || "Enter your location"}
-              maxLength={200}
-              className="rounded-xl border-2 border-border bg-card h-12 text-base font-body"
-            />
-            {showSuggestions && locationSuggestions.length > 0 && (
-              <div className="absolute top-[72px] left-0 right-0 z-20 bg-card border-2 border-border mt-1 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                {locationSuggestions.map((loc: any) => (
-                  <div
-                    key={loc.place_id}
-                    className="p-3 hover:bg-muted cursor-pointer text-sm font-body border-b border-border last:border-0 truncate"
-                    onClick={() => {
-                      setForm({ ...form, location: loc.display_name });
-                      setShowSuggestions(false);
-                    }}
-                  >
-                    {loc.display_name}
-                  </div>
-                ))}
+          {/* Avatar + Name Section */}
+          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center text-primary-foreground font-display font-bold text-xl shadow-md">
+                {initials}
               </div>
-            )}
+              <div className="flex-1">
+                <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-1">Personal Info</p>
+                <p className="text-sm font-body text-muted-foreground">{form.name || "Set your farmer profile"}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Name */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.name")}
+                </Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder={t("profile.namePlaceholder")}
+                  maxLength={100}
+                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                />
+              </div>
+
+              {/* Location */}
+              <div className="space-y-1.5 relative">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.location") || "Location"}
+                </Label>
+                <Input
+                  value={form.location}
+                  onChange={(e) => handleLocationChange(e.target.value)}
+                  onFocus={() => {
+                    if (locationSuggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  placeholder={t("profile.locationPlaceholder") || "Enter your location"}
+                  maxLength={200}
+                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                />
+                {showSuggestions && locationSuggestions.length > 0 && (
+                  <div className="absolute top-[64px] left-0 right-0 z-20 bg-card border border-border/60 mt-1 rounded-xl shadow-elevated max-h-48 overflow-y-auto">
+                    {locationSuggestions.map((loc: any) => (
+                      <div
+                        key={loc.place_id}
+                        className="p-3 hover:bg-primary/5 cursor-pointer text-sm font-body border-b border-border/30 last:border-0 truncate transition-colors"
+                        onClick={() => {
+                          setForm({ ...form, location: loc.display_name });
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {loc.display_name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Land Size */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <Ruler className="w-4 h-4 text-primary" />
-              {t("profile.landSize")}
-            </Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.1"
-              value={form.landSize}
-              onChange={(e) => setForm({ ...form, landSize: e.target.value })}
-              placeholder={t("profile.landPlaceholder")}
-              className="rounded-xl border-2 border-border bg-card h-12 text-base font-body"
-            />
-          </div>
+          {/* Farm Details Section */}
+          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
+            <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">Farm Details</p>
 
-          {/* Experience */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <Award className="w-4 h-4 text-primary" />
-              {t("profile.experience") || "Farming Experience"}
-            </Label>
-            <RadioGroup
-              value={form.experience}
-              onValueChange={(val) => setForm({ ...form, experience: val })}
-              className="space-y-2"
-            >
-              {(["beginner", "intermediate", "expert"] as const).map((level) => (
-                <div
-                  key={level}
-                  className="flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary/50 transition-colors"
+            <div className="space-y-4">
+              {/* Land Size */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Ruler className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.landSize")}
+                </Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={form.landSize}
+                  onChange={(e) => setForm({ ...form, landSize: e.target.value })}
+                  placeholder={t("profile.landPlaceholder")}
+                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                />
+              </div>
+
+              {/* Crops */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Sprout className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.crops")}
+                </Label>
+                <Input
+                  value={form.crops}
+                  onChange={(e) => setForm({ ...form, crops: e.target.value })}
+                  placeholder={t("profile.cropsPlaceholder")}
+                  maxLength={300}
+                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                />
+              </div>
+
+              {/* Experience */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Award className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.experience") || "Farming Experience"}
+                </Label>
+                <RadioGroup
+                  value={form.experience}
+                  onValueChange={(val) => setForm({ ...form, experience: val })}
+                  className="flex gap-2"
                 >
-                  <RadioGroupItem value={level} id={level} />
-                  <Label htmlFor={level} className="text-sm font-body text-foreground cursor-pointer">
-                    {t(`profile.exp.${level}`) || level}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+                  {(["beginner", "intermediate", "expert"] as const).map((level) => (
+                    <div
+                      key={level}
+                      className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all text-center justify-center ${
+                        form.experience === level
+                          ? "border-primary bg-primary/8 shadow-sm"
+                          : "border-border/60 bg-background hover:border-primary/30"
+                      }`}
+                    >
+                      <RadioGroupItem value={level} id={level} className="sr-only" />
+                      <Label htmlFor={level} className="text-xs font-display font-semibold text-foreground cursor-pointer">
+                        {t(`profile.exp.${level}`) || level}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </div>
           </div>
 
-          {/* Weather */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <Sun className="w-4 h-4 text-primary" />
+          {/* Weather Section */}
+          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
+            <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">Weather Context</p>
+
+            <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground mb-3">
+              <Sun className="w-3.5 h-3.5 text-primary" />
               {t("profile.weather") || "Current Weather Context"}
             </Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {(["Sunny", "Rainy", "Cloudy", "Windy"] as const).map((w) => (
                 <div
                   key={w}
                   onClick={() => setForm({ ...form, weather: w })}
-                  className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-colors ${
-                    form.weather === w ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/50'
+                  className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                    form.weather === w
+                      ? "border-primary bg-primary/8 shadow-sm"
+                      : "border-border/60 bg-background hover:border-primary/30"
                   }`}
                 >
                   {w === "Sunny" && <Sun className="w-4 h-4 text-amber-500" />}
@@ -203,26 +252,16 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Crops */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-display font-semibold text-foreground">
-              <Sprout className="w-4 h-4 text-primary" />
-              {t("profile.crops")}
-            </Label>
-            <Input
-              value={form.crops}
-              onChange={(e) => setForm({ ...form, crops: e.target.value })}
-              placeholder={t("profile.cropsPlaceholder")}
-              maxLength={300}
-              className="rounded-xl border-2 border-border bg-card h-12 text-base font-body"
-            />
-          </div>
-
-          {/* Save */}
+          {/* Save Button */}
           <motion.button
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSave}
-            className="w-full py-4 rounded-xl gradient-hero text-primary-foreground font-display font-bold text-base flex items-center justify-center gap-2"
+            className={`w-full py-4 rounded-xl font-display font-bold text-base flex items-center justify-center gap-2.5 shadow-lg transition-all duration-300 ${
+              saved
+                ? "bg-primary text-primary-foreground"
+                : "gradient-hero text-primary-foreground hover:shadow-xl"
+            }`}
           >
             {saved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
             {t("profile.save")}
