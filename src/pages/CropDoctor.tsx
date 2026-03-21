@@ -129,7 +129,8 @@ const CropDoctor = () => {
     formData.append("image", file);
     formData.append("prompt", "Analyze this crop image and provide a JSON diagnosis with disease name, confidence, symptoms, treatment, and fertilizer recommendations. Respond ONLY with valid JSON.");
 
-    const response = await fetch("http://localhost:3001/api/analyze", {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+    const response = await fetch(`${backendUrl}/api/analyze`, {
       method: "POST",
       body: formData,
     });

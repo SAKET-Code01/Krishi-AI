@@ -87,7 +87,8 @@ const KrishiInsight = ({ temp, condition }: { temp: string; condition: string })
           language === "or" ? "Odia" : language === "hi" ? "Hindi" : "English"
         } based on: Location: ${userLoc}, Temp: ${temp}, Weather: ${condition}. Markets: Rice ₹2,150 (up), Wheat ₹2,340 (down). Give me today's pro farming tip.`;
 
-        const response = await fetch("http://localhost:3001/api/chat", {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+        const response = await fetch(`${backendUrl}/api/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: promptText }),

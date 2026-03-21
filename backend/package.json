@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Express backend for Krishi AI voice processing.",
   "main": "server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node server.js",
+    "build": "echo 'No build step required'",
     "dev": "node server.js",
     "test": "echo \"No backend tests configured\""
   },
