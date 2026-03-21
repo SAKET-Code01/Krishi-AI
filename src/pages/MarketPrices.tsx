@@ -4,6 +4,7 @@ import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 interface MarketItem {
   crop: string;
@@ -81,7 +82,7 @@ const MarketPrices = () => {
     const fetchPrices = async () => {
       try {
         setLoading(true);
-        let url = "http://localhost:3001/api/market-prices";
+        let url = getApiUrl("/api/market-prices");
         const params = new URLSearchParams();
         if (selectedState) params.append("state", selectedState);
         if (selectedDistrict) params.append("district", selectedDistrict);

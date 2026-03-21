@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mic, MicOff, Volume2, ArrowLeft, MessageSquare, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -69,7 +70,7 @@ const VoiceAssistant = () => {
                           : "English"
                     } script. Keep answers simple, traditional, and helpful.`;
 
-      const response = await fetch("http://localhost:3001/api/chat", {
+      const response = await fetch(getApiUrl("/api/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

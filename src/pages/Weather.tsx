@@ -4,6 +4,7 @@ import { CloudSun, CloudRain, Sun, Cloud, Wind, Droplets, Thermometer, ArrowLeft
 import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 const Weather = () => {
   const navigate = useNavigate();
@@ -102,7 +103,7 @@ const Weather = () => {
       3. A specific action for the farmer. 
       Keep it practical and helpful.`;
 
-      const res = await fetch("http://localhost:3001/api/chat", {
+      const res = await fetch(getApiUrl("/api/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: prompt })

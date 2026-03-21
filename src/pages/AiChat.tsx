@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Bot, Sparkles, Mic, MicOff, Volume2, VolumeX, X, Paperclip, MoreVertical, CheckCheck, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 type Message = {
   id: string;
@@ -190,7 +191,7 @@ const AiChat = () => {
         formData.append("image", currentImage);
         formData.append("prompt", currentInput || "Analyze this image and identify any diseases or crop conditions.");
         
-        const response = await fetch("http://localhost:3001/api/chat", {
+        const response = await fetch(getApiUrl("/api/chat"), {
   method: "POST",
   body: formData,
 });
@@ -204,7 +205,7 @@ const AiChat = () => {
           ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Odia language. Keep actionable."
           : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
 
-        let response = await fetch("http://localhost:3001/api/chat", {
+        let response = await fetch(getApiUrl("/api/chat"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
@@ -228,7 +229,7 @@ const AiChat = () => {
         if (!isCorrectLanguage(aiText, language)) {
           // Language mismatch detected, retrying with stricter prompt
           const stricterPrompt = language === "hi" ? "Respond strictly in Hindi only." : "Respond strictly in Odia language only.";
-          const retryResponse = await fetch("http://localhost:3001/api/chat", {
+          const retryResponse = await fetch(getApiUrl("/api/chat"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: currentInput, systemPrompt: `${baseSystemPrompt} ${stricterPrompt}` }),
@@ -261,7 +262,7 @@ const AiChat = () => {
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "Server is waking up... please try again in 10 seconds.",
+          text: error.message || "Server is waking up... please try again in 10 seconds.",
           sender: "ai",
           timestamp: new Date(),
           isError: true,

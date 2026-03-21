@@ -516,7 +516,6 @@ if (!apiKey) {
 return res.json({ success: true, data: getMockData() });
 }
 
-```
 const response = await fetch(`https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=25`);
 const data = await response.json();
 
@@ -533,7 +532,6 @@ const formattedData = data.records.map(record => ({
 }));
 
 res.json({ success: true, data: formattedData });
-```
 
 } catch (error) {
 console.error(error);

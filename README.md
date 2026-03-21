@@ -50,7 +50,10 @@ PORT=3001
 Create a `.env` file in the **root** directory:
 ```env
 VITE_GEMINI_API_KEY=your_key
+VITE_API_BASE_URL=http://localhost:3001
 ```
+
+For Vercel or any deployed frontend, set `VITE_API_BASE_URL` to your deployed backend base URL, for example `https://your-backend-service.onrender.com`.
 
 ### 3. Installation
 

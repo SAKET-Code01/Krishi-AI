@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getApiUrl } from "@/lib/api";
 
 interface DiagnosisResult {
   disease: string;
@@ -129,7 +130,7 @@ const CropDoctor = () => {
     formData.append("image", file);
     formData.append("prompt", "Analyze this crop image and provide a JSON diagnosis with disease name, confidence, symptoms, treatment, and fertilizer recommendations. Respond ONLY with valid JSON.");
 
-    const response = await fetch("http://localhost:3001/api/analyze", {
+    const response = await fetch(getApiUrl("/api/analyze"), {
       method: "POST",
       body: formData,
     });

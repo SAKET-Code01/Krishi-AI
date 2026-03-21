@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 const insightFallbacks = {
   en: {
@@ -87,7 +88,7 @@ const KrishiInsight = ({ temp, condition }: { temp: string; condition: string })
           language === "or" ? "Odia" : language === "hi" ? "Hindi" : "English"
         } based on: Location: ${userLoc}, Temp: ${temp}, Weather: ${condition}. Markets: Rice ₹2,150 (up), Wheat ₹2,340 (down). Give me today's pro farming tip.`;
 
-        const response = await fetch("http://localhost:3001/api/chat", {
+        const response = await fetch(getApiUrl("/api/chat"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: promptText }),
