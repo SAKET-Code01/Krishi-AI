@@ -106,7 +106,7 @@ const CropDoctor = () => {
       const base64Data = match ? match[2] : base64Image;
       const prompt = "Analyze this image and provide a JSON response exactly matching this format: { \"disease\": \"disease name\", \"confidence\": 95, \"symptoms\": [\"symptom 1\"], \"treatment\": [\"treatment 1\"], \"fertilizers\": [\"fertilizer 1\"] }. Respond ONLY with valid JSON.";
 
-      const response = await fetch("https://krishi-ai-tasn.onrender.com/api/vision", {
+      const response = await fetch("http://localhost:3001/api/vision", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

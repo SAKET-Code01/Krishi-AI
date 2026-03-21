@@ -190,7 +190,7 @@ const AiChat = () => {
         formData.append("image", currentImage);
         formData.append("prompt", currentInput || "Analyze this image and identify any diseases or crop conditions.");
         
-        const response = await fetch("https://krishi-ai-tasn.onrender.com/api/analyze-image", {
+        const response = await fetch("http://localhost:3001/api/analyze-image", {
           method: "POST",
           body: formData,
         });
@@ -204,7 +204,7 @@ const AiChat = () => {
           ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Odia language. Keep actionable."
           : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
 
-        let response = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
+        let response = await fetch("http://localhost:3001/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
@@ -220,9 +220,9 @@ const AiChat = () => {
 
         // Fallback Safety Check
         if (!isCorrectLanguage(aiText, language)) {
-          console.log("Language mismatch detected. Retrying with stricter prompt...");
+          // Language mismatch detected, retrying with stricter prompt
           const stricterPrompt = language === "hi" ? "Respond strictly in Hindi only." : "Respond strictly in Odia language only.";
-          const retryResponse = await fetch("https://krishi-ai-tasn.onrender.com/api/chat", {
+          const retryResponse = await fetch("http://localhost:3001/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: currentInput, systemPrompt: `${baseSystemPrompt} ${stricterPrompt}` }),
