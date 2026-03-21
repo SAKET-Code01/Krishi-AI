@@ -216,7 +216,13 @@ const AiChat = () => {
         if (!response.ok) throw new Error("Backend connection failed");
         
         let data = await response.json();
-        aiText = data.text;
+        
+        // Ensure success is true before using data.text
+        if (response.ok && data.success) {
+          aiText = data.text;
+        } else {
+          throw new Error("AI failed. Try again.");
+        }
 
         // Fallback Safety Check
         if (!isCorrectLanguage(aiText, language)) {
@@ -230,7 +236,11 @@ const AiChat = () => {
 
           if (retryResponse.ok) {
             const retryData = await retryResponse.json();
-            if (retryData.text) aiText = retryData.text;
+            if (retryData.success && retryData.text) {
+              aiText = retryData.text;
+            } else {
+              throw new Error("AI failed. Try again.");
+            }
           }
         }
       }
