@@ -121,19 +121,21 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
 });
 
 app.post('/api/chat', limiter, async (req, res) => {
-  console.log(`\n[API/CHAT] Request received. Message length: ${req.body?.message?.length || 0}`);
+  console.log("Incoming request:", req.body);
   const { message, systemPrompt } = req.body;
 
   if (!message) {
-    console.error('[API/CHAT] Error: Message is required');
     return res.status(400).json({ error: 'Message is required' });
+  }
+
+  if (!process.env.GROQ_API_KEY) {
+    console.error("GROQ_API_KEY missing");
   }
 
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') {
-    console.error('[API/CHAT] Error: GROQ_API_KEY is missing or invalid in environment variables.');
-    return res.status(500).json({ error: "Server Configuration Error: GROQ_API_KEY is missing. Check Render Environment Settings." });
+    return res.status(500).json({ error: "AI service failed" });
   }
 
   const strictAgriculturePrompt = `Role Definition:
@@ -165,6 +167,7 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
 
 
   try {
+    console.log("Calling AI API...");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -188,7 +191,6 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
 
     if (!response.ok) {
         const errorText = await response.text();
-        console.error('Groq API failure detail:', response.status, errorText);
         throw new Error(`Groq API failure: ${errorText}`);
     }
 
@@ -197,11 +199,12 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
     
     if (!aiText) throw new Error("Empty response from Groq");
 
-    console.log('[API/CHAT] Successfully fetched response from Groq.');
     res.json({ text: aiText, success: true });
   } catch (error) {
-    console.error('[API/CHAT] Groq Chat error:', error);
-    res.status(502).json({ error: `AI Service Error: ${error.message}` });
+    console.error("Error:", error.message);
+    return res.status(500).json({
+      error: "AI service failed"
+    });
   }
 });
 
