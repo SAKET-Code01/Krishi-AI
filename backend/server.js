@@ -24,7 +24,15 @@ const limiter = rateLimit({
   legacyHeaders: false, 
 });
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL || 'https://krishi-ai-demo-omega.vercel.app'
+  ],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -224,8 +232,9 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
     res.json({ text: aiText, success: true });
   } catch (error) {
     console.error("Error:", error.message);
-    return res.status(500).json({
-      error: "AI service failed"
+    return res.status(502).json({
+      success: false,
+      text: error.message || "AI service failed"
     });
   } finally {
     if (imageFilePath) safeUnlink(imageFilePath);

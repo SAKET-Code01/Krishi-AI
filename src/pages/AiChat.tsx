@@ -211,6 +211,11 @@ const AiChat = () => {
           body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
         });
         
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
+        });
+        
         if (response.status === 429) {
           throw new Error("Too many requests. Please wait a moment.");
         }
@@ -218,35 +223,16 @@ const AiChat = () => {
         
         let data = await response.json();
         
-        // Ensure success is true before using data.text
-        if (response.ok && data.success) {
-          aiText = data.text;
-        } else {
-          throw new Error("AI failed. Try again.");
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || data.text || `Server error: ${response.status}`);
         }
+        aiText = data.text;
 
         // Fallback Safety Check
         if (!isCorrectLanguage(aiText, language)) {
           // Language mismatch detected, retrying with stricter prompt
           const stricterPrompt = language === "hi" ? "Respond strictly in Hindi only." : "Respond strictly in Odia language only.";
           const retryResponse = await fetch(getApiUrl("/api/chat"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: currentInput, systemPrompt: `${baseSystemPrompt} ${stricterPrompt}` }),
-          });
-
-          if (retryResponse.ok) {
-            const retryData = await retryResponse.json();
-            if (retryData.success && retryData.text) {
-              aiText = retryData.text;
-            } else {
-              throw new Error("AI failed. Try again.");
-            }
-          }
-        }
-      }
-
-      setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
