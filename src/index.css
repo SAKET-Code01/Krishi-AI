@@ -1,0 +1,251 @@
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/noto-sans-oriya/400.css";
+@import "@fontsource/noto-sans-oriya/500.css";
+@import "@fontsource/noto-sans-oriya/600.css";
+@import "@fontsource/noto-sans-oriya/700.css";
+@import "@fontsource/noto-sans-devanagari/400.css";
+@import "@fontsource/noto-sans-devanagari/500.css";
+@import "@fontsource/noto-sans-devanagari/600.css";
+@import "@fontsource/noto-sans-devanagari/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 142 72% 37%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 199 89% 48%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 35%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 72% 37%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(199, 89%, 48%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(210, 40%, 98%) 100%);
+    --shadow-card: 0 4px 24px -4px hsl(142 72% 37% / 0.1);
+    --shadow-elevated: 0 12px 40px -8px hsl(222 47% 11% / 0.15);
+    --font-display: "Plus Jakarta Sans", "Noto Sans Oriya", "Noto Sans Devanagari", "Kalinga", "Mangal", sans-serif;
+    --font-body: "Inter", "Noto Sans Oriya", "Noto Sans Devanagari", "Kalinga", "Mangal", sans-serif;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 142 72% 37%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 72% 95%;
+    --sidebar-accent-foreground: 142 72% 20%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 142 72% 37%;
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: normal;
+    word-break: break-word;
+    font-variant-ligatures: normal;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-body {
+    font-family: var(--font-body);
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.06),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  }
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.06);
+  }
+  .bg-mesh {
+    background-color: hsl(var(--background));
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(142, 72%, 37%, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(38, 92%, 50%, 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(142, 72%, 37%, 0.08) 0px, transparent 50%);
+  }
+  .text-gradient {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .card-hover-glow {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .card-hover-glow:hover {
+    box-shadow: 0 8px 30px -4px hsl(142 72% 37% / 0.15), 0 4px 12px -2px hsl(142 72% 37% / 0.08);
+  }
+  .accent-strip-left {
+    position: relative;
+    overflow: hidden;
+  }
+  .accent-strip-left::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: currentColor;
+    opacity: 0.6;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Shimmer sweep animation for cards */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-on-hover {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-on-hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  transition: none;
+  pointer-events: none;
+}
+.shimmer-on-hover:hover::after {
+  animation: shimmer-sweep 0.6s ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px 4px hsl(142 72% 37% / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 20px 6px hsl(142 72% 37% / 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gentle-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(142 72% 37% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px hsl(142 72% 37% / 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+.animate-gentle-ring {
+  animation: gentle-ring 2s ease-in-out infinite;
+}
