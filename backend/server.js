@@ -121,16 +121,19 @@ app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
 });
 
 app.post('/api/chat', limiter, async (req, res) => {
+  console.log(`\n[API/CHAT] Request received. Message length: ${req.body?.message?.length || 0}`);
   const { message, systemPrompt } = req.body;
 
   if (!message) {
+    console.error('[API/CHAT] Error: Message is required');
     return res.status(400).json({ error: 'Message is required' });
   }
 
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') {
-    return res.json({ text: "Due to network issue, basic advice: check soil moisture and pests.", success: false });
+    console.error('[API/CHAT] Error: GROQ_API_KEY is missing or invalid in environment variables.');
+    return res.status(500).json({ error: "Server Configuration Error: GROQ_API_KEY is missing. Check Render Environment Settings." });
   }
 
   const strictAgriculturePrompt = `Role Definition:
@@ -194,34 +197,28 @@ Keep answers simple and practical. Prefer step-by-step guidance. Polite, respect
     
     if (!aiText) throw new Error("Empty response from Groq");
 
+    console.log('[API/CHAT] Successfully fetched response from Groq.');
     res.json({ text: aiText, success: true });
   } catch (error) {
-    console.error('Groq Chat error:', error);
-    res.json({ text: "Due to network issue, basic advice: check soil moisture and pests.", success: false });
+    console.error('[API/CHAT] Groq Chat error:', error);
+    res.status(502).json({ error: `AI Service Error: ${error.message}` });
   }
 });
 
 app.post('/api/vision', async (req, res) => {
+  console.log('\n[API/VISION] Request received.');
   const { prompt, imageBase64, mimeType } = req.body;
 
   if (!prompt || !imageBase64) {
+    console.error('[API/VISION] Error: Prompt or image missing');
     return res.status(400).json({ error: 'Prompt and image are required' });
   }
 
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') {
-    // Fallback response when no API key
-    return res.json({ 
-      text: JSON.stringify({
-        disease: "Unable to analyze (API key missing)",
-        confidence: 0,
-        symptoms: ["Please configure GROQ_API_KEY in backend/.env"],
-        treatment: ["Contact support or add your API key"],
-        fertilizers: []
-      }), 
-      success: false 
-    });
+    console.error('[API/VISION] Error: GROQ_API_KEY is missing.');
+    return res.status(500).json({ error: 'Missing GROQ_API_KEY. Please configure in Render environment.' });
   }
 
   // 1. Try Local vLLM Vision API first (OpenAI Compatible)
@@ -306,35 +303,29 @@ app.post('/api/vision', async (req, res) => {
     const data = await groqResponse.json();
     const aiText = data.choices[0]?.message?.content || "{}";
 
+    console.log('[API/VISION] Successfully processed vision request via Groq synthesis.');
     res.json({ text: aiText, success: true });
   } catch (error) {
-    console.error('Vision fallback error:', error);
-    // Graceful fallback instead of crashing
-    res.json({ 
-      text: JSON.stringify({
-        disease: "Possible plant stress detected",
-        confidence: 40,
-        symptoms: ["Visual analysis temporarily unavailable", "Leaf discoloration or wilting observed"],
-        treatment: ["Apply neem oil spray", "Check soil moisture levels", "Ensure proper drainage"],
-        fertilizers: ["Organic compost", "Balanced NPK fertilizer"]
-      }), 
-      success: false 
-    });
+    console.error('[API/VISION] Vision fallback error:', error);
+    res.status(502).json({ error: `Vision Service Error: ${error.message}` });
   }
 });
 
 app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res) => {
+  console.log('\n[API/ANALYZE-IMAGE] Request received.');
   const imageFilePath = req.file?.path;
 
   if (!imageFilePath) {
+    console.error('[API/ANALYZE-IMAGE] Error: Image file missing');
     return res.status(400).json({ error: 'Image file is required' });
   }
 
   const apiKey = process.env.HF_API_KEY;
 
   if (!apiKey || apiKey === 'YOUR_HF_API_KEY_HERE') {
+    console.error('[API/ANALYZE-IMAGE] Error: HF_API_KEY missing');
     safeUnlink(imageFilePath);
-    return res.json({ text: "This looks like a possible plant disease. Recommended: use neem oil spray and monitor leaves.", success: false });
+    return res.status(500).json({ error: 'Missing HF_API_KEY configuration in Render' });
   }
 
   try {
@@ -395,10 +386,11 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
     const topPrediction = data?.[0]?.label || "Unknown Plant";
     const aiText = `Image Analysis Result: Detected primarily as **${topPrediction}**. Wait for further contextual analysis or monitor continuously for specific diseases.`;
 
+    console.log('[API/ANALYZE-IMAGE] Successfully processed image via Hugging Face.');
     res.json({ text: aiText, success: true, predictions: data });
   } catch (error) {
-    console.error('Vision error:', error);
-    res.json({ text: "This looks like a possible plant disease. Recommended: use neem oil spray and monitor leaves.", success: false });
+    console.error('[API/ANALYZE-IMAGE] API Error:', error);
+    res.status(502).json({ error: `Image Analysis Failed: ${error.message}` });
   } finally {
     safeUnlink(imageFilePath);
   }
@@ -406,5 +398,11 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
 
 const PORT = Number(process.env.PORT) || 3001;
 app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
+  console.log(`[SYSTEM] Backend running on port ${PORT}`);
+  
+  // Environment Check Logging
+  console.log('[SYSTEM] --- Environment Variables Check ---');
+  console.log(`[SYSTEM] GROQ_API_KEY: ${process.env.GROQ_API_KEY ? '✅ Configured' : '❌ Missing'}`);
+  console.log(`[SYSTEM] HF_API_KEY: ${process.env.HF_API_KEY ? '✅ Configured' : '❌ Missing'}`);
+  console.log(`[SYSTEM] GEMINI_API_KEY: ${(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY) ? '✅ Configured' : '❌ Missing'}`);
 });
