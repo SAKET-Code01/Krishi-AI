@@ -244,6 +244,13 @@ const translations: Translations = {
   "login.verifying": { en: "Verifying...", hi: "सत्यापन हो रहा है...", or: "ଯାଞ୍ଚ ହେଉଛି..." },
   "login.noOtp": { en: "Didn't receive?", hi: "OTP नहीं मिला?", or: "OTP ମିଳିଲା ନାହିଁ?" },
   "login.resend": { en: "Resend", hi: "फिर भेजें", or: "ପୁନଃ ପଠାନ୍ତୁ" },
+  "login.demoHint": {
+    en: "Demo mode: SMS is not connected. Enter the code below.",
+    hi: "डेमो मोड: SMS कनेक्ट नहीं है। नीचे दिया कोड दर्ज करें।",
+    or: "ଡେମୋ: SMS ସଂଯୁକ୍ତ ନୁହେଁ। ତଳେ ଦିଆଯାଇଥିବା କୋଡ୍ ଦିଅନ୍ତୁ।",
+  },
+  "login.demoCode": { en: "Your code", hi: "आपका कोड", or: "ଆପଣଙ୍କ କୋଡ୍" },
+  "login.invalidOtp": { en: "Invalid code. Please try again.", hi: "गलत कोड। पुनः प्रयास करें।", or: "ଭୁଲ କୋଡ୍। ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ।" },
   "login.or": { en: "or", hi: "या", or: "କିମ୍ବା" },
   "login.guest": { en: "Continue as Guest", hi: "अतिथि के रूप में जारी रखें", or: "ଅତିଥି ଭାବରେ ଜାରି ରଖନ୍ତୁ" },
   "login.terms": { en: "By continuing, you agree to our Terms of Service and Privacy Policy.", hi: "जारी रखकर, आप हमारी सेवा शर्तों और गोपनीयता नीति से सहमत हैं।", or: "ଜାରି ରଖି ଆପଣ ଆମ ସେବା ସର୍ତ୍ତ ଓ ଗୋପନୀୟତା ନୀତି ସହ ସହମତ |" },

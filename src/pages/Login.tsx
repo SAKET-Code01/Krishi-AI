@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,8 +14,14 @@ import heroImage from "@/assets/hero-farming.jpg";
 import logo from "@/assets/krishi-logo.png";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { cn } from "@/lib/utils";
 
 const OTP_LENGTH = 6;
+
+const otpStorageKey = (digits: string) => `krishi_otp_${digits}`;
+
+const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
 
 type Step = "phone" | "otp";
 
@@ -28,6 +34,9 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [phoneError, setPhoneError] = useState("");
+  const [otpError, setOtpError] = useState("");
+  /** Shown on the OTP step so users can log in without SMS (demo). */
+  const [demoCode, setDemoCode] = useState<string | null>(null);
 
   const isValidPhone = /^[6-9]\d{9}$/.test(phone);
 
@@ -37,22 +46,48 @@ const Login = () => {
       return;
     }
     setPhoneError("");
+    setOtpError("");
     setLoading(true);
-    setTimeout(() => {
+    const code = generateOtp();
+    try {
+      sessionStorage.setItem(otpStorageKey(phone), code);
+    } catch {
+      /* ignore quota / private mode */
+    }
+    setDemoCode(code);
+    setOtp("");
+    window.setTimeout(() => {
       setLoading(false);
       setStep("otp");
-    }, 1200);
+    }, 600);
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = useCallback(async () => {
     if (otp.length < OTP_LENGTH) return;
+    setOtpError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      localStorage.setItem("userType", "authenticated");
-      navigate("/profile");
-    }, 1000);
-  };
+    const expected = (() => {
+      try {
+        return sessionStorage.getItem(otpStorageKey(phone)) ?? demoCode;
+      } catch {
+        return demoCode;
+      }
+    })();
+    await new Promise((r) => setTimeout(r, 450));
+    setLoading(false);
+    if (!expected || otp !== expected) {
+      setOtpError(t("login.invalidOtp"));
+      return;
+    }
+    try {
+      sessionStorage.removeItem(otpStorageKey(phone));
+    } catch {
+      /* ignore */
+    }
+    localStorage.setItem("userType", "authenticated");
+    localStorage.setItem("userPhone", phone);
+    navigate("/profile");
+  }, [otp, phone, demoCode, navigate, t]);
 
   const handleGuest = () => {
     localStorage.setItem("userType", "guest");
@@ -300,67 +335,70 @@ const Login = () => {
                         </p>
                       </div>
                       <button
-                        onClick={() => setStep("phone")}
+                        type="button"
+                        onClick={() => {
+                          setStep("phone");
+                          setOtp("");
+                          setDemoCode(null);
+                          setOtpError("");
+                        }}
                         className="ml-auto text-xs text-primary font-display font-semibold hover:underline"
                       >
                         {t("login.change")}
                       </button>
                     </div>
 
-                    {/* OTP boxes */}
+                    <p className="text-xs font-body text-muted-foreground leading-relaxed px-1">
+                      {t("login.demoHint")}
+                    </p>
+                    {demoCode && (
+                      <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3 text-center">
+                        <p className="text-xs font-body text-muted-foreground mb-1">{t("login.demoCode")}</p>
+                        <p className="text-2xl font-display font-bold tracking-[0.35em] text-primary tabular-nums">
+                          {demoCode}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* OTP boxes — input-otp handles paste, order, and focus */}
                     <div>
                       <label className="block text-sm font-display font-semibold text-foreground mb-3">
                         {t("login.otp")}
                       </label>
-                      <div className="flex gap-2 justify-between">
-                        {Array.from({ length: OTP_LENGTH }).map((_, i) => (
-                          <input
-                            key={i}
-                            id={`otp-box-${i}`}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={otp[i] || ""}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              const newOtp = otp.split("");
-                              newOtp[i] = val;
-                              const joined = newOtp.join("").slice(0, OTP_LENGTH);
-                              setOtp(joined);
-                              // auto-focus next
-                              if (val && i < OTP_LENGTH - 1) {
-                                const next = document.getElementById(
-                                  `otp-box-${i + 1}`
-                                ) as HTMLInputElement | null;
-                                next?.focus();
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Backspace" && !otp[i] && i > 0) {
-                                const prev = document.getElementById(
-                                  `otp-box-${i - 1}`
-                                ) as HTMLInputElement | null;
-                                prev?.focus();
-                                const newOtp = otp.split("");
-                                newOtp[i - 1] = "";
-                                setOtp(newOtp.join(""));
-                              }
-                            }}
-                            className={`w-11 h-12 text-center text-lg font-display font-bold rounded-xl border-2 bg-background outline-none transition-colors focus:border-primary ${
-                              otp[i]
-                                ? "border-primary text-primary"
-                                : "border-input text-foreground"
-                            }`}
-                          />
-                        ))}
-                      </div>
+                      <InputOTP
+                        maxLength={OTP_LENGTH}
+                        value={otp}
+                        onChange={(val) => {
+                          setOtp(val);
+                          setOtpError("");
+                        }}
+                        onComplete={() => handleVerifyOtp()}
+                        containerClassName="w-full justify-between gap-2"
+                      >
+                        <InputOTPGroup className="flex w-full justify-between gap-2">
+                          {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+                            <InputOTPSlot
+                              key={i}
+                              index={i}
+                              className={cn(
+                                "h-12 w-11 rounded-xl border-2 text-lg font-display font-bold first:rounded-xl last:rounded-xl",
+                                otp[i] ? "border-primary text-primary" : "border-input",
+                              )}
+                            />
+                          ))}
+                        </InputOTPGroup>
+                      </InputOTP>
+                      {otpError && (
+                        <p className="text-destructive text-xs font-body mt-2">{otpError}</p>
+                      )}
                     </div>
 
                     {/* Verify button */}
                     <motion.button
+                      type="button"
                       id="verify-otp-btn"
                       whileTap={{ scale: 0.97 }}
-                      onClick={handleVerifyOtp}
+                      onClick={() => handleVerifyOtp()}
                       disabled={otp.length < OTP_LENGTH || loading}
                       className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl gradient-hero text-primary-foreground font-display font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50"
                     >
@@ -381,9 +419,17 @@ const Login = () => {
                     <p className="text-center text-xs font-body text-muted-foreground">
                       {t("login.noOtp")}{" "}
                       <button
+                        type="button"
                         onClick={() => {
                           setOtp("");
-                          setStep("phone");
+                          setOtpError("");
+                          const code = generateOtp();
+                          try {
+                            sessionStorage.setItem(otpStorageKey(phone), code);
+                          } catch {
+                            /* ignore */
+                          }
+                          setDemoCode(code);
                         }}
                         className="text-primary font-semibold hover:underline"
                       >
