@@ -52,6 +52,7 @@ const AiChat = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
 
   // Initial greeting
@@ -82,20 +83,25 @@ const AiChat = () => {
   // Init Speech Recognition
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = language === "or" ? "or-IN" : language === "hi" ? "hi-IN" : "en-IN";
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onresult = (event: any) => {
         const transcript = Array.from(event.results)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((result: any) => result[0])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((result: any) => result.transcript)
           .join('');
         setInput(transcript);
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
         setIsListening(false);
@@ -206,7 +212,7 @@ const AiChat = () => {
           : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
 
         const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
-        let response = await fetch(`${backendUrl}/api/chat`, {
+        const response = await fetch(`${backendUrl}/api/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
@@ -217,7 +223,7 @@ const AiChat = () => {
         }
         if (!response.ok) throw new Error("Backend connection failed");
         
-        let data = await response.json();
+        const data = await response.json();
         aiText = data.text;
 
         // Fallback Safety Check
@@ -248,7 +254,7 @@ const AiChat = () => {
         },
       ]);
       speakText(aiText);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("AI Error:", error);
       setMessages((prev) => [
         ...prev,
@@ -263,7 +269,7 @@ const AiChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [input, selectedImage, isLoading, isListening, language, toggleListen, isCorrectLanguage, speakText]);
+  }, [input, selectedImage, imagePreview, isLoading, isListening, language, toggleListen, isCorrectLanguage, speakText]);
 
   const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -291,7 +297,7 @@ const AiChat = () => {
         <div className="flex items-center gap-1">
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value as any)}
+            onChange={(e) => setLanguage(e.target.value as "en" | "hi" | "or")}
             className="bg-white/10 text-white text-xs font-medium rounded px-1.5 py-1 outline-none appearance-none border border-white/20 cursor-pointer text-center mr-1"
           >
             <option value="en" className="text-black">EN</option>

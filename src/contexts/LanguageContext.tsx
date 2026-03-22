@@ -264,8 +264,26 @@ const translations: Translations = {
   "aiChat.typing": { en: "Krishi AI is typing...", hi: "कृषि AI टाइप कर रहा है...", or: "କୃଷି AI ଟାଇପ୍ କରୁଛି..." },
   // Language
   "lang.label": { en: "Language", hi: "भाषा", or: "ଭାଷା" },
-  // Profile
-  "profile.weather": { en: "Select Weather Condition", hi: "मौसम की स्थिति चुनें", or: "ପାଣିପାଗ ସ୍ଥିତି ବାଛନ୍ତୁ" },
+  // Profile V2
+  "profile.personalInfo": { en: "Personal Info", hi: "व्यक्तिगत जानकारी", or: "ବ୍ୟକ୍ତିଗତ ତଥ୍ୟ" },
+  "profile.setProfile": { en: "Set your farmer profile", hi: "अपना किसान प्रोफ़ाइल सेट करें", or: "ଆପଣଙ୍କ ଚାଷୀ ପ୍ରୋଫାଇଲ ସେଟ୍ କରନ୍ତୁ" },
+  "profile.phone": { en: "Phone Number", hi: "फ़ोन नंबर", or: "ଫୋନ ନମ୍ବର" },
+  "profile.phonePlaceholder": { en: "e.g. +91 9876543210", hi: "जैसे +91 9876543210", or: "ଯେପରି +91 9876543210" },
+  "profile.farmDetails": { en: "Farm Details", hi: "खेत का विवरण", or: "ଫାର୍ମ ବିବରଣୀ" },
+  "profile.soilType": { en: "Primary Soil Type", hi: "प्राथमिक मिट्टी प्रकार", or: "ପ୍ରାଥମିକ ମାଟି ପ୍ରକାର" },
+  "profile.irrigation": { en: "Irrigation Method", hi: "सिंचाई विधि", or: "ଜଳସେଚନ ପଦ୍ଧତି" },
+  "profile.completeness": { en: "Profile Completeness", hi: "प्रोफ़ाइल पूर्णता", or: "ପ୍ରୋଫାଇଲ ସମ୍ପୂର୍ଣ୍ଣତା" },
+  "profile.soil.alluvial": { en: "Alluvial", hi: "जलोढ़", or: "ପଟୁ ମାଟି" },
+  "profile.soil.black": { en: "Black", hi: "काली", or: "କଳା ମାଟି" },
+  "profile.soil.red": { en: "Red", hi: "लाल", or: "ଲାଲ ମାଟି" },
+  "profile.soil.laterite": { en: "Laterite", hi: "लैटेराइट", or: "ଲ୍ୟାଟେରାଇଟ" },
+  "profile.soil.arid": { en: "Arid", hi: "बंजर", or: "ବାଲିଆ" },
+  "profile.soil.other": { en: "Other", hi: "अन्य", or: "ଅନ୍ୟ" },
+  "profile.irr.rainfed": { en: "Rainfed", hi: "वर्षा आधारित", or: "ବର୍ଷା ନିର୍ଭର" },
+  "profile.irr.tubewell": { en: "Tube Well", hi: "ट्यूबवेल", or: "ଟ୍ୟୁବ୍ ୱେଲ" },
+  "profile.irr.drip": { en: "Drip", hi: "ड्रिप", or: "ଡ୍ରିପ୍" },
+  "profile.irr.sprinkler": { en: "Sprinkler", hi: "स्प्रिंकलर", or: "ସ୍ପ୍ରିଙ୍କଲର" },
+  "profile.irr.canal": { en: "Canal", hi: "नहर", or: "ନାଳ" },
   // States
   "state.odisha": { en: "Odisha", hi: "ओडिशा", or: "ଓଡ଼ିଶା" },
   "state.maharashtra": { en: "Maharashtra", hi: "महाराष्ट्र", or: "ମହାରାଷ୍ଟ୍ର" },

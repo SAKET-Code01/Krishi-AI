@@ -11,6 +11,7 @@ interface MarketItem {
   price: number;
   change: number;
   trend: string;
+  date?: string;
 }
 
 const locationData: Record<string, { key: string, districts: { name: string, key: string }[] }> = {
@@ -76,12 +77,14 @@ const MarketPrices = () => {
   const [loading, setLoading] = useState(true);
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [sortBy, setSortBy] = useState("recommended");
 
   useEffect(() => {
     const fetchPrices = async () => {
       try {
         setLoading(true);
-        let url = "http://localhost:3001/api/market-prices";
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+        let url = `${baseUrl}/api/market-prices`;
         const params = new URLSearchParams();
         if (selectedState) params.append("state", selectedState);
         if (selectedDistrict) params.append("district", selectedDistrict);
@@ -119,11 +122,18 @@ const MarketPrices = () => {
     { crop: t("crop.sugarcane"), market: "Balasore Mandi (Mock)", price: 350, change: -0.3, trend: "down" },
   ];
 
-  const filtered = marketData.filter(
-    (entry) =>
-      entry.crop.toLowerCase().includes(search.toLowerCase()) ||
-      entry.market.toLowerCase().includes(search.toLowerCase()),
-  );
+  const sortedAndFiltered = marketData
+    .filter(
+      (entry) =>
+        entry.crop.toLowerCase().includes(search.toLowerCase()) ||
+        entry.market.toLowerCase().includes(search.toLowerCase()),
+    )
+    .sort((a, b) => {
+      if (sortBy === "price-high-low") return b.price - a.price;
+      if (sortBy === "price-low-high") return a.price - b.price;
+      if (sortBy === "change-high-low") return b.change - a.change;
+      return 0;
+    });
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -151,28 +161,41 @@ const MarketPrices = () => {
           />
         </div>
         
-        <div className="flex gap-2 mt-3">
-          <select 
-            value={selectedState} 
-            onChange={(e) => { setSelectedState(e.target.value); setSelectedDistrict(""); }}
-            className="flex-1 px-3 py-2.5 rounded-xl bg-muted border-2 border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-          >
-            <option value="">{t("market.all_states") || "All States"}</option>
-            {Object.entries(locationData).map(([name, data]) => (
-              <option key={name} value={name}>{t(data.key)}</option>
-            ))}
-          </select>
+        <div className="flex flex-col gap-3 mt-4">
+          <div className="flex gap-2">
+            <select 
+              value={selectedState} 
+              onChange={(e) => { setSelectedState(e.target.value); setSelectedDistrict(""); }}
+              className="flex-1 px-3 py-2.5 rounded-xl bg-muted border-2 border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">{t("market.all_states") || "All States"}</option>
+              {Object.entries(locationData).map(([name, data]) => (
+                <option key={name} value={name}>{t(data.key)}</option>
+              ))}
+            </select>
 
+            <select 
+              value={selectedDistrict} 
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              disabled={!selectedState}
+              className="flex-1 px-3 py-2.5 rounded-xl bg-muted border-2 border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+            >
+              <option value="">{t("market.all_districts") || "All Districts"}</option>
+              {selectedState && locationData[selectedState].districts.map(dist => (
+                <option key={dist.name} value={dist.name}>{t(dist.key)}</option>
+              ))}
+            </select>
+          </div>
+          
           <select 
-            value={selectedDistrict} 
-            onChange={(e) => setSelectedDistrict(e.target.value)}
-            disabled={!selectedState}
-            className="flex-1 px-3 py-2.5 rounded-xl bg-muted border-2 border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl bg-muted border-2 border-border text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
-            <option value="">{t("market.all_districts") || "All Districts"}</option>
-            {selectedState && locationData[selectedState].districts.map(dist => (
-              <option key={dist.name} value={dist.name}>{t(dist.key)}</option>
-            ))}
+            <option value="recommended">Sort by: Recommended</option>
+            <option value="price-high-low">Price: High to Low</option>
+            <option value="price-low-high">Price: Low to High</option>
+            <option value="change-high-low">Top Gainers</option>
           </select>
         </div>
       </div>
@@ -183,12 +206,12 @@ const MarketPrices = () => {
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
             <p className="text-sm font-body text-muted-foreground">{t("market.loading") || "Fetching live mandi prices..."}</p>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : sortedAndFiltered.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-sm font-body text-muted-foreground">No markets found for "{search}"</p>
           </div>
         ) : (
-          filtered.map((item, i) => (
+          sortedAndFiltered.map((item, i) => (
           <motion.div
             key={item.crop + item.market}
             initial={{ opacity: 0, y: 10 }}
@@ -199,6 +222,11 @@ const MarketPrices = () => {
             <div>
               <p className="font-display font-bold text-foreground">{item.crop}</p>
               <p className="text-xs font-body text-muted-foreground">{item.market}</p>
+              {item.date && (
+                <p className="text-[10px] font-body text-muted-foreground/70 mt-1">
+                  Updated: {item.date}
+                </p>
+              )}
             </div>
             <div className="text-right">
               <p className="font-display font-bold text-lg text-foreground">₹{item.price.toLocaleString()}</p>

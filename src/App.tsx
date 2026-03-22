@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
-import CropDoctor from "./pages/CropDoctor.tsx";
 import VoiceAssistant from "./pages/VoiceAssistant.tsx";
 import MarketPrices from "./pages/MarketPrices.tsx";
 import FarmJobs from "./pages/FarmJobs.tsx";
@@ -39,7 +38,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/crop-doctor" element={<ProtectedRoute><CropDoctor /></ProtectedRoute>} />
             <Route path="/voice-assistant" element={<ProtectedRoute><VoiceAssistant /></ProtectedRoute>} />
             <Route path="/market" element={<ProtectedRoute><MarketPrices /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><FarmJobs /></ProtectedRoute>} />

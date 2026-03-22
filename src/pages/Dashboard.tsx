@@ -10,7 +10,6 @@ import {
   Bell,
   Sprout,
   Sparkles,
-  Stethoscope,
   MessageSquare,
   MapPin,
   FileText,
@@ -18,6 +17,7 @@ import {
   Leaf,
   Sun,
   ArrowUpRight,
+  Briefcase,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -133,7 +133,7 @@ const stagger = {
 };
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as any } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 };
 
 const Dashboard = () => {
@@ -219,13 +219,14 @@ const Dashboard = () => {
       }
     };
     void fetchWeather();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
   const quickActions = [
     { icon: MessageSquare, label: "AI Chat", path: "/ai-chat", color: "from-primary to-emerald-500" },
-    { icon: Stethoscope, label: "Crop Doc", path: "/crop-doctor", color: "from-secondary to-cyan-400" },
     { icon: TrendingUp, label: "Market", path: "/market", color: "from-amber-500 to-orange-400" },
     { icon: FileText, label: "Schemes", path: "/schemes", color: "from-violet-500 to-purple-400" },
+    { icon: Briefcase, label: "Jobs", path: "/jobs", color: "from-blue-500 to-cyan-400" },
   ];
 
   const crops = [

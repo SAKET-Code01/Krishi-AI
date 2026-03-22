@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, MapPin, Ruler, Sprout, Award, Save, Check, Sun, Cloud, CloudRain, Wind } from "lucide-react";
+import { ArrowLeft, User, MapPin, Ruler, Sprout, Award, Save, Check, X, Phone, Layers, Droplets } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -10,19 +10,63 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 
+const soilTypeKeys = ["alluvial", "black", "red", "laterite", "arid", "other"];
+const irrigationKeys = ["rainfed", "tubewell", "drip", "sprinkler", "canal"];
+const irrigationValues = ["Rainfed", "Tube Well", "Drip", "Sprinkler", "Canal"];
+const soilValues = ["Alluvial", "Black", "Red", "Laterite", "Arid", "Other"];
+
+const stagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [saved, setSaved] = useState(false);
 
-  const [form, setForm] = useState(() => {
+  const [form, setForm] = useState<{
+    name: string;
+    location: string;
+    phone: string;
+    landSize: string;
+    experience: string;
+    crops: string[];
+    soil: string;
+    irrigation: string;
+  }>(() => {
     const stored = localStorage.getItem("krishi-ai-profile");
-    return stored
-      ? JSON.parse(stored)
-      : { name: "", location: "", landSize: "", experience: "beginner", crops: "", weather: "Sunny" };
+    let initialForm = {
+      name: "",
+      location: "",
+      phone: "",
+      landSize: "",
+      experience: "beginner",
+      crops: [],
+      soil: "",
+      irrigation: "",
+    };
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed.crops === 'string') {
+          parsed.crops = parsed.crops.split(',').map((c: string) => c.trim()).filter(Boolean);
+        }
+        delete parsed.weather;
+        initialForm = { ...initialForm, ...parsed };
+      } catch (e) {
+        console.error("Failed to parse profile JSON", e);
+      }
+    }
+    return initialForm;
   });
 
-  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [cropInput, setCropInput] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState<{ place_id: string; display_name: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleLocationChange = async (val: string) => {
@@ -41,18 +85,31 @@ const Profile = () => {
     }
   };
 
+  const calculateCompleteness = () => {
+    let score = 0;
+    const total = 6;
+    if (form.name.trim()) score++;
+    if (form.location.trim()) score++;
+    if (form.phone.trim()) score++;
+    if (form.landSize.trim()) score++;
+    if (form.crops.length > 0) score++;
+    if (form.soil && form.irrigation) score++;
+    return Math.round((score / total) * 100);
+  };
+  const completeness = calculateCompleteness();
+
   const handleSave = () => {
     if (!form.name.trim() || !form.location.trim() || !form.landSize.trim()) {
       toast({
         title: "Missing fields",
-        description: "Please fill in name, location and land size.",
+        description: "Please fill in Name, Location and Land Size.",
         variant: "destructive",
       });
       return;
     }
     localStorage.setItem("krishi-ai-profile", JSON.stringify(form));
     setSaved(true);
-    toast({ title: t("profile.saved") });
+    toast({ title: t("profile.saved") || "Profile Saved Successfully" });
     setTimeout(() => {
       setSaved(false);
       navigate("/reports");
@@ -60,7 +117,7 @@ const Profile = () => {
   };
 
   const initials = form.name
-    ? form.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    ? form.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "KA";
 
   return (
@@ -85,20 +142,32 @@ const Profile = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6 max-w-lg">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
-        >
-          {/* Avatar + Name Section */}
-          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
+        {/* Profile Completeness Bar */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-display font-bold text-foreground uppercase tracking-wider">{t("profile.completeness")}</span>
+            <span className="text-xs font-display font-bold text-primary">{completeness}%</span>
+          </div>
+          <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden border border-border/40">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${completeness}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="h-full rounded-full gradient-hero"
+            />
+          </div>
+        </div>
+
+        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
+          {/* Avatar + Personal Info Section */}
+          <motion.div variants={fadeUp} className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border/40 p-6 card-hover-glow shadow-sm">
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center text-primary-foreground font-display font-bold text-xl shadow-md">
+              <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center text-primary-foreground font-display font-bold text-xl shadow-md border border-primary/20">
                 {initials}
               </div>
               <div className="flex-1">
-                <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-1">Personal Info</p>
-                <p className="text-sm font-body text-muted-foreground">{form.name || "Set your farmer profile"}</p>
+                <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t("profile.personalInfo")}</p>
+                <p className="text-sm font-body text-foreground font-medium">{form.name || t("profile.setProfile")}</p>
               </div>
             </div>
 
@@ -112,9 +181,25 @@ const Profile = () => {
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder={t("profile.namePlaceholder")}
+                  placeholder={t("profile.namePlaceholder") || "Enter your full name"}
                   maxLength={100}
-                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                  className="rounded-xl border border-border/60 bg-background/50 h-11 text-sm font-body focus:border-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Phone className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.phone")}
+                </Label>
+                <Input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9+]/g, '') })}
+                  placeholder={t("profile.phonePlaceholder")}
+                  maxLength={15}
+                  className="rounded-xl border border-border/60 bg-background/50 h-11 text-sm font-body focus:border-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
 
@@ -131,13 +216,13 @@ const Profile = () => {
                     if (locationSuggestions.length > 0) setShowSuggestions(true);
                   }}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder={t("profile.locationPlaceholder") || "Enter your location"}
+                  placeholder={t("profile.locationPlaceholder") || "Enter your location (Village, District)"}
                   maxLength={200}
-                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                  className="rounded-xl border border-border/60 bg-background/50 h-11 text-sm font-body focus:border-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
                 {showSuggestions && locationSuggestions.length > 0 && (
                   <div className="absolute top-[64px] left-0 right-0 z-20 bg-card border border-border/60 mt-1 rounded-xl shadow-elevated max-h-48 overflow-y-auto">
-                    {locationSuggestions.map((loc: any) => (
+                    {locationSuggestions.map((loc) => (
                       <div
                         key={loc.place_id}
                         className="p-3 hover:bg-primary/5 cursor-pointer text-sm font-body border-b border-border/30 last:border-0 truncate transition-colors"
@@ -153,11 +238,11 @@ const Profile = () => {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Farm Details Section */}
-          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
-            <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">Farm Details</p>
+          <motion.div variants={fadeUp} className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border/40 p-6 card-hover-glow shadow-sm">
+            <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t("profile.farmDetails")}</p>
 
             <div className="space-y-4">
               {/* Land Size */}
@@ -166,34 +251,104 @@ const Profile = () => {
                   <Ruler className="w-3.5 h-3.5 text-primary" />
                   {t("profile.landSize")}
                 </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={form.landSize}
-                  onChange={(e) => setForm({ ...form, landSize: e.target.value })}
-                  placeholder={t("profile.landPlaceholder")}
-                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={form.landSize}
+                    onChange={(e) => setForm({ ...form, landSize: e.target.value })}
+                    placeholder={t("profile.landPlaceholder") || "e.g. 2.5"}
+                    className="rounded-xl border border-border/60 bg-background/50 h-11 text-sm font-body focus:border-primary transition-colors pr-16 focus-visible:ring-1 focus-visible:ring-primary/20"
+                  />
+                  <span className="absolute right-4 text-xs font-display font-semibold text-muted-foreground pointer-events-none">
+                    Acres
+                  </span>
+                </div>
+              </div>
+
+              {/* Soil Type */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Layers className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.soilType")}
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {soilTypeKeys.map((key, i) => (
+                    <button
+                      key={key}
+                      onClick={() => setForm({ ...form, soil: form.soil === soilValues[i] ? "" : soilValues[i] })}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-display font-semibold transition-all border ${
+                        form.soil === soilValues[i]
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                          : "bg-background/50 border-border/60 text-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {t(`profile.soil.${key}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Irrigation Method */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
+                  <Droplets className="w-3.5 h-3.5 text-primary" />
+                  {t("profile.irrigation")}
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {irrigationKeys.map((key, i) => (
+                    <button
+                      key={key}
+                      onClick={() => setForm({ ...form, irrigation: form.irrigation === irrigationValues[i] ? "" : irrigationValues[i] })}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-display font-semibold transition-all border ${
+                        form.irrigation === irrigationValues[i]
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                          : "bg-background/50 border-border/60 text-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {t(`profile.irr.${key}`)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Crops */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 pt-1">
                 <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
                   <Sprout className="w-3.5 h-3.5 text-primary" />
                   {t("profile.crops")}
                 </Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {form.crops.map((crop) => (
+                    <span key={crop} className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-display font-semibold flex items-center gap-1 shadow-sm">
+                      {crop}
+                      <button onClick={() => setForm({ ...form, crops: form.crops.filter(c => c !== crop) })} className="hover:text-destructive transition-colors">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
                 <Input
-                  value={form.crops}
-                  onChange={(e) => setForm({ ...form, crops: e.target.value })}
-                  placeholder={t("profile.cropsPlaceholder")}
-                  maxLength={300}
-                  className="rounded-xl border border-border/60 bg-background h-11 text-sm font-body focus:border-primary transition-colors"
+                  value={cropInput}
+                  onChange={(e) => setCropInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && cropInput.trim()) {
+                      e.preventDefault();
+                      if (!form.crops.includes(cropInput.trim())) {
+                        setForm({ ...form, crops: [...form.crops, cropInput.trim()] });
+                      }
+                      setCropInput("");
+                    }
+                  }}
+                  placeholder={t("profile.cropsPlaceholder") || "Type a crop and press Enter"}
+                  maxLength={50}
+                  className="rounded-xl border border-border/60 bg-background/50 h-11 text-sm font-body focus:border-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
 
               {/* Experience */}
-              <div className="space-y-2">
+              <div className="space-y-2 pt-1">
                 <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">
                   <Award className="w-3.5 h-3.5 text-primary" />
                   {t("profile.experience") || "Farming Experience"}
@@ -206,14 +361,15 @@ const Profile = () => {
                   {(["beginner", "intermediate", "expert"] as const).map((level) => (
                     <div
                       key={level}
+                      onClick={() => setForm({ ...form, experience: level })}
                       className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all text-center justify-center ${
                         form.experience === level
-                          ? "border-primary bg-primary/8 shadow-sm"
-                          : "border-border/60 bg-background hover:border-primary/30"
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border/60 bg-background/50 hover:border-primary/30"
                       }`}
                     >
                       <RadioGroupItem value={level} id={level} className="sr-only" />
-                      <Label htmlFor={level} className="text-xs font-display font-semibold text-foreground cursor-pointer">
+                      <Label htmlFor={level} className="text-[11px] font-display font-semibold text-foreground cursor-pointer pointer-events-none">
                         {t(`profile.exp.${level}`) || level}
                       </Label>
                     </div>
@@ -221,50 +377,22 @@ const Profile = () => {
                 </RadioGroup>
               </div>
             </div>
-          </div>
-
-          {/* Weather Section */}
-          <div className="bg-card rounded-2xl border border-border/40 p-6 card-hover-glow">
-            <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">Weather Context</p>
-
-            <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground mb-3">
-              <Sun className="w-3.5 h-3.5 text-primary" />
-              {t("profile.weather") || "Current Weather Context"}
-            </Label>
-            <div className="grid grid-cols-2 gap-2.5">
-              {(["Sunny", "Rainy", "Cloudy", "Windy"] as const).map((w) => (
-                <div
-                  key={w}
-                  onClick={() => setForm({ ...form, weather: w })}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
-                    form.weather === w
-                      ? "border-primary bg-primary/8 shadow-sm"
-                      : "border-border/60 bg-background hover:border-primary/30"
-                  }`}
-                >
-                  {w === "Sunny" && <Sun className="w-4 h-4 text-amber-500" />}
-                  {w === "Rainy" && <CloudRain className="w-4 h-4 text-blue-500" />}
-                  {w === "Cloudy" && <Cloud className="w-4 h-4 text-slate-400" />}
-                  {w === "Windy" && <Wind className="w-4 h-4 text-teal-500" />}
-                  <span className="text-sm font-body text-foreground">{t(`weather.${w.toLowerCase()}`)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          </motion.div>
 
           {/* Save Button */}
           <motion.button
+            variants={fadeUp}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSave}
-            className={`w-full py-4 rounded-xl font-display font-bold text-base flex items-center justify-center gap-2.5 shadow-lg transition-all duration-300 ${
+            className={`w-full py-4 rounded-xl font-display font-bold text-base flex items-center justify-center gap-2.5 shadow-lg transition-all duration-300 mt-2 ${
               saved
-                ? "bg-primary text-primary-foreground"
-                : "gradient-hero text-primary-foreground hover:shadow-xl"
+                ? "bg-primary text-primary-foreground shadow-primary/20"
+                : "gradient-hero text-primary-foreground hover:shadow-xl hover:shadow-primary/20"
             }`}
           >
             {saved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
-            {t("profile.save")}
+            {t("profile.save") || "Save Profile"}
           </motion.button>
         </motion.div>
       </div>

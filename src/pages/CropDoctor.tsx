@@ -47,7 +47,7 @@ const CropDoctor = () => {
 
   const [location, setLocation] = useState("");
   const [weather, setWeather] = useState("Sunny");
-  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [locationSuggestions, setLocationSuggestions] = useState<{ place_id: string; display_name: string }[]>([]);
   const [showLocSuggestions, setShowLocSuggestions] = useState(false);
 
   useEffect(() => {
@@ -60,7 +60,9 @@ const CropDoctor = () => {
         const parsed = JSON.parse(savedProfile);
         if (parsed.location) setLocation(parsed.location);
         if (parsed.weather) setWeather(parsed.weather);
-      } catch {}
+      } catch (err) {
+        // Ignore parsing errors
+      }
     }
   }, []);
 
@@ -72,7 +74,9 @@ const CropDoctor = () => {
         const data = await res.json();
         setLocationSuggestions(data);
         setShowLocSuggestions(true);
-      } catch {}
+      } catch (err) {
+        // Ignore fetch errors
+      }
     } else {
       setShowLocSuggestions(false);
     }
@@ -227,7 +231,7 @@ const CropDoctor = () => {
               />
               {showLocSuggestions && locationSuggestions.length > 0 && (
                 <div className="absolute top-[60px] left-0 right-0 z-20 bg-card border border-border/60 mt-1 rounded-xl shadow-elevated max-h-40 overflow-y-auto">
-                  {locationSuggestions.map((loc: any) => (
+                  {locationSuggestions.map((loc: { place_id: string; display_name: string }) => (
                     <div key={loc.place_id} className="p-2.5 hover:bg-primary/5 cursor-pointer text-xs font-body border-b border-border/30 last:border-0 truncate" onClick={() => { setLocation(loc.display_name); setShowLocSuggestions(false); }}>
                       {loc.display_name}
                     </div>

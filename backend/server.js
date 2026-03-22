@@ -9,8 +9,10 @@ const textToSpeech = require('@google-cloud/text-to-speech');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const rateLimit = require('express-rate-limit');
 
-dotenv.config(); // Loads backend/.env
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') }); // Fallback to root .env if needed
+// Explicitly load backend/.env
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+// Fallback to root .env if needed
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const app = express();
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -239,16 +241,15 @@ app.post('/api/analyze', limiter, upload.single('image'), async (req, res) => {
     return res.status(400).json({ error: 'Image file is required' });
   }
 
-  const groqKey = process.env.GROQ_API_KEY;
-  const hfKey = process.env.HF_API_KEY;
+  const genAI = getGeminiClient();
 
-  if (!hfKey || hfKey === 'YOUR_HF_API_KEY_HERE') {
+  if (!genAI) {
     safeUnlink(imageFilePath);
     return res.json({ 
       text: JSON.stringify({
-        disease: "Unable to analyze (HF API key missing)",
+        disease: "Unable to analyze (Gemini API key missing)",
         confidence: 0,
-        symptoms: ["Please configure HF_API_KEY in backend/.env"],
+        symptoms: ["Please configure GEMINI_API_KEY in backend/.env"],
         treatment: ["Contact support or add your API key"],
         fertilizers: []
       }), 
@@ -258,97 +259,28 @@ app.post('/api/analyze', limiter, upload.single('image'), async (req, res) => {
 
   try {
     const imageBuffer = fs.readFileSync(imageFilePath);
-
-    // Step 1: Plant disease classification via Hugging Face
-    // We pass the raw binary Buffer explicitly
-    const hfResponse = await fetch(
-      "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${hfKey}`,
-          "Content-Type": "application/octet-stream",
-        },
-        body: imageBuffer,
-      }
-    );
-
-    if (!hfResponse.ok) {
-      const errText = await hfResponse.text();
-      console.error("HF API error:", hfResponse.status, errText);
-      throw new Error(`Hugging Face API failure: ${hfResponse.status}`);
-    }
-
-    const hfData = await hfResponse.json();
-    console.log("HF Plant Disease Results:", JSON.stringify(hfData?.slice(0, 3)));
-
-    if (!hfData || !Array.isArray(hfData) || hfData.length === 0) {
-      return res.json({
-        text: JSON.stringify({
-          disease: "Unable to classify image",
-          confidence: 0,
-          isNonCrop: false,
-          symptoms: ["The model could not classify this image"],
-          treatment: ["Please upload a clearer image of a crop leaf"],
-          fertilizers: []
-        }),
-        success: false
-      });
-    }
-
-    const topLabel = hfData[0]?.label || "";
-    const topScore = Math.round((hfData[0]?.score || 0) * 100);
-    const allLabels = hfData.slice(0, 5).map(p => `${p.label} (${Math.round(p.score * 100)}%)`).join(", ");
-
-    // Step 2: Non-crop detection
-    const plantKeywords = [
-      'tomato', 'potato', 'apple', 'corn', 'maize', 'grape', 'cherry',
-      'peach', 'pepper', 'strawberry', 'squash', 'soybean', 'rice',
-      'wheat', 'citrus', 'orange', 'leaf', 'plant', 'crop', 'healthy',
-      'blight', 'rust', 'mold', 'rot', 'spot', 'scab', 'wilt', 'mosaic',
-      'mildew', 'bacterial', 'fungal', 'virus'
-    ];
-
-    const isPlantRelated = hfData.some(pred => {
-      const label = pred.label.toLowerCase();
-      return plantKeywords.some(kw => label.includes(kw)) && pred.score > 0.05;
-    });
-
-    if (!isPlantRelated || topScore < 10) {
-      return res.json({
-        text: JSON.stringify({
-          disease: "Not a crop image",
-          confidence: 0,
-          isNonCrop: true,
-          symptoms: ["The uploaded image does not appear to be a crop or plant"],
-          treatment: ["Please upload a clear image of a crop leaf for disease analysis"],
-          fertilizers: []
-        }),
-        success: true
-      });
-    }
-
-    // Step 3: Send classification context to Groq for structured diagnosis
-    let aiText = "{}";
-    if (groqKey && groqKey !== 'YOUR_GROQ_API_KEY_HERE') {
-      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${groqKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          "model": "llama-3.3-70b-versatile",
-          "messages": [
-            {
-              "role": "system",
-              "content": `You are an expert agricultural crop disease analyst. A plant image was analyzed by an AI classifier. The top predictions were: ${allLabels}. 
-
-Based on these classifications, provide a JSON response with this exact format:
+    const mimeType = req.file?.mimetype || "image/jpeg";
+    
+    const prompt = `You are an expert agricultural crop disease analyst. I am providing you with an image.
+If the image is NOT a real crop, plant, or leaf (e.g. it is a road, a person, a car, or completely unrelated to agriculture), you MUST return this exact JSON response:
 {
-  "disease": "Name of the disease or 'Healthy' if the plant appears healthy",
-  "confidence": ${topScore},
+  "disease": "Not a crop image",
+  "confidence": 0,
+  "isHealthy": false,
+  "isNonCrop": true,
+  "explanation": "This image does not appear to be a crop or plant.",
+  "symptoms": ["The uploaded image is not a crop."],
+  "treatment": ["Please upload a clear image of a crop leaf for disease analysis."],
+  "fertilizers": [],
+  "suggestion": "Upload a valid plant image."
+}
+
+If the image IS a crop or plant, carefully analyze its health and identify any diseases, pests, or deficiencies. Provide a JSON response with this exact format:
+{
+  "disease": "Name of the disease or 'Healthy Plant' if it appears healthy",
+  "confidence": <number between 0 and 100 representing your confidence>,
   "isHealthy": true/false,
+  "isNonCrop": false,
   "explanation": "Brief plain-English explanation of what this disease/condition means",
   "symptoms": ["symptom 1", "symptom 2", "symptom 3"],
   "treatment": ["treatment step 1", "treatment step 2", "treatment step 3"],
@@ -357,41 +289,43 @@ Based on these classifications, provide a JSON response with this exact format:
 }
 
 Rules:
-- If the label contains "healthy" → isHealthy: true, disease: "Healthy Plant"
-- Clean up the label into a human-readable disease name (e.g., "Tomato___Late_blight" → "Late Blight")
-- Include the crop name in the disease field (e.g., "Tomato - Late Blight")
-- Give safe, practical treatment advice suitable for Indian farmers
-- If confidence is below 60, add a note in explanation that the result is uncertain
-- Never give harmful or dangerous advice
-- Respond ONLY with valid JSON, no markdown`
-            }
-          ],
-          "response_format": { "type": "json_object" }
-        })
-      });
+- Give safe, practical treatment advice suitable for Indian farmers.
+- Respond ONLY with valid JSON. No markdown formatting, no backticks, no extra text.`;
 
-      if (groqResponse.ok) {
-        const groqData = await groqResponse.json();
-        aiText = groqData.choices[0]?.message?.content || "{}";
-      } else {
-        console.error("Groq fallback failed:", await groqResponse.text());
-        throw new Error("Groq API failed");
+    let result = null;
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-pro-latest', 'gemini-pro-vision'];
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`[API/VISION] Trying model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              data: imageBuffer.toString("base64"),
+              mimeType: mimeType
+            }
+          }
+        ]);
+        if (result && result.response) {
+            break; // Success!
+        }
+      } catch (err) {
+        console.error(`[API/VISION] Model ${modelName} failed:`, err.message);
+        lastError = err;
       }
-    } else {
-      // Fallback if no Groq Key but HF worked
-      aiText = JSON.stringify({
-        disease: topLabel.replace(/___/g, " - ").replace(/_/g, " "),
-        confidence: topScore,
-        isHealthy: topLabel.toLowerCase().includes("healthy"),
-        explanation: "Analyzed visually by AI.",
-        symptoms: [],
-        treatment: ["Please consult an agricultural expert based on this visual diagnosis."],
-        fertilizers: [],
-        suggestion: "Monitor crop daily."
-      });
     }
 
-    console.log('[API/VISION] Successfully processed vision request via Groq synthesis.');
+    if (!result || !result.response) {
+      throw lastError || new Error("All Gemini vision models failed");
+    }
+
+    const responseText = result.response.text();
+    let aiText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    console.log('[API/VISION] Successfully processed vision request via Gemini.');
     res.json({ text: aiText, success: true });
   } catch (error) {
     console.error('Vision analysis error:', error);
@@ -495,48 +429,99 @@ app.post('/api/analyze-image', limiter, upload.single('image'), async (req, res)
   }
 });
 
-function getMockData() {
-  return [
-    { crop: "Rice", market: "Cuttack Mandi (Mock)", price: 2150, change: 3.2, trend: "up" },
-    { crop: "Wheat", market: "Sambalpur Mandi (Mock)", price: 2340, change: -1.5, trend: "down" },
-    { crop: "Mustard", market: "Balasore Mandi (Mock)", price: 5200, change: 5.1, trend: "up" },
-    { crop: "Onion", market: "Bhubaneswar Mandi (Mock)", price: 1800, change: -8.3, trend: "down" },
-    { crop: "Tomato", market: "Puri Mandi (Mock)", price: 2600, change: 12.0, trend: "up" },
-    { crop: "Potato", market: "Cuttack Mandi (Mock)", price: 1200, change: 0.5, trend: "up" },
-    { crop: "Green Gram", market: "Berhampur Mandi (Mock)", price: 7100, change: 2.8, trend: "up" },
-    { crop: "Sugarcane", market: "Balasore Mandi (Mock)", price: 350, change: -0.3, trend: "down" }
+function getMockData(stateName) {
+  const mockDate = new Date().toLocaleDateString('en-IN');
+  const baseData = [
+    { crop: "Rice", market: "Cuttack Mandi (Mock)", price: 2150, change: 3.2, trend: "up", date: mockDate },
+    { crop: "Wheat", market: "Sambalpur Mandi (Mock)", price: 2340, change: -1.5, trend: "down", date: mockDate },
+    { crop: "Mustard", market: "Balasore Mandi (Mock)", price: 5200, change: 5.1, trend: "up", date: mockDate },
+    { crop: "Onion", market: "Bhubaneswar Mandi (Mock)", price: 1800, change: -8.3, trend: "down", date: mockDate },
+    { crop: "Tomato", market: "Puri Mandi (Mock)", price: 2600, change: 12.0, trend: "up", date: mockDate },
+    { crop: "Potato", market: "Cuttack Mandi (Mock)", price: 1200, change: 0.5, trend: "up", date: mockDate },
+    { crop: "Green Gram", market: "Berhampur Mandi (Mock)", price: 7100, change: 2.8, trend: "up", date: mockDate },
+    { crop: "Sugarcane", market: "Balasore Mandi (Mock)", price: 350, change: -0.3, trend: "down", date: mockDate }
   ];
+
+  if (stateName) {
+    const stateTitle = stateName.charAt(0).toUpperCase() + stateName.slice(1);
+    return baseData.map(item => ({
+      ...item,
+      market: `${stateTitle} Central Mandi (Live Fallback)`
+    }));
+  }
+  return baseData;
 }
 
 app.get('/api/market-prices', limiter, async (req, res) => {
   try {
     const apiKey = process.env.DATA_GOV_IN_API_KEY;
     if (!apiKey) {
-      return res.json({ success: true, data: getMockData() });
+      return res.json({ success: true, data: getMockData(req.query.state) });
     }
 
     const { state, district } = req.query;
 
     // Try fetching from Data.gov.in API
-    let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=25`;
-    if (state) url += `&filters[state.keyword]=${encodeURIComponent(state)}`;
-    if (district) url += `&filters[district]=${encodeURIComponent(district)}`;
+    let baseUrl = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=300`;
     
-    // Some versions of the API use filters[state], others use filters[state.keyword]. 
-    // We can just try standard filters first:
-    url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${apiKey}&format=json&limit=25`;
-    if (state) url += `&filters[state]=${encodeURIComponent(state)}`;
-    if (district) url += `&filters[district]=${encodeURIComponent(district)}`;
-    const response = await fetch(url);
+    const fetchWithFilter = async (filterType) => {
+      let filterUrl = baseUrl;
+      if (state) filterUrl += `&filters[${filterType}]=${encodeURIComponent(state)}`;
+      if (district) filterUrl += `&filters[district]=${encodeURIComponent(district)}`;
+      
+      try {
+        console.log(`[API/MARKET] Fetching: ${filterUrl.replace(apiKey, 'REDACTED')}`);
+        const response = await fetch(filterUrl, { signal: AbortSignal.timeout(10000) }); // 10s timeout
+        if (!response.ok) {
+          console.error(`[API/MARKET] API error: ${response.status} ${response.statusText}`);
+          return null;
+        }
+        return await response.json();
+      } catch (err) {
+        console.error(`[API/MARKET] Fetch failed: ${err.message}`);
+        return null;
+      }
+    };
 
-    if (!response.ok) {
-      throw new Error(`Data.gov.in API failed: ${response.status}`);
+    let data = await fetchWithFilter('state.keyword');
+    
+    if (!data || !data.records || data.records.length === 0) {
+      console.log('[API/MARKET] No records with state.keyword, trying state...');
+      data = await fetchWithFilter('state');
     }
 
-    const data = await response.json();
+    // Fallback: If still no records for specific state, fetch all recent live data
+    if (!data || !data.records || data.records.length === 0) {
+      console.log('[API/MARKET] No state records found, fetching all live data...');
+      const allDataResponse = await fetch(baseUrl, { signal: AbortSignal.timeout(10000) });
+      if (allDataResponse.ok) {
+        const allData = await allDataResponse.json();
+        if (allData.records && allData.records.length > 0) {
+          // Try manual filtering just in case
+          if (state || district) {
+            const manualFiltered = allData.records.filter(r => 
+              (state && r.state?.toLowerCase().includes(state.toLowerCase())) ||
+              (district && r.district?.toLowerCase().includes(district.toLowerCase()))
+            );
+            
+            if (manualFiltered.length > 0) {
+              console.log(`[API/MARKET] Found ${manualFiltered.length} records via manual filtering`);
+              data = { records: manualFiltered };
+            } else {
+              console.log('[API/MARKET] No live data for this specific state. Showing state fallback data.');
+              data = { records: [] };
+            }
+          } else {
+            console.log('[API/MARKET] Using all available live data as fallback');
+            data = allData;
+          }
+        }
+      }
+    }
 
-    if (!data.records || data.records.length === 0) {
-      return res.json({ success: true, data: getMockData() });
+    if (!data || !data.records || data.records.length === 0) {
+      console.log('[API/MARKET] No live data available at all, falling back to mock data');
+      return res.json({ success: true, data: getMockData(state), isMock: true });
     }
 
     const formattedData = data.records.map(record => {
@@ -550,13 +535,14 @@ app.get('/api/market-prices', limiter, async (req, res) => {
         price: parseFloat(record.modal_price) || 0,
         change: parseFloat(change),
         trend: trend,
+        date: record.arrival_date || new Date().toLocaleDateString('en-IN')
       };
     });
 
     res.json({ success: true, data: formattedData });
   } catch (error) {
     console.error('Mandi prices fetch error:', error);
-    res.json({ success: true, data: getMockData() }); // Fallback
+    res.json({ success: true, data: getMockData(req.query.state) }); // Fallback
   }
 });
 

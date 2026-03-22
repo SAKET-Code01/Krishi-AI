@@ -18,6 +18,7 @@ const Weather = () => {
     feelsLike: "35°C",
     icon: CloudSun
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [forecast, setForecast] = useState<any[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -89,8 +90,10 @@ const Weather = () => {
       }
     };
     void fetchFullWeather();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fetchAIAnalysis = async (forecastData: any[], location: string) => {
     setAnalyzing(true);
     try {

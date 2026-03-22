@@ -1,11 +1,11 @@
-import { Home, Stethoscope, ShoppingCart, User, MessageSquare } from "lucide-react";
+import { Home, FileText, ShoppingCart, User, MessageSquare } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const navItems = [
   { icon: Home, labelKey: "nav.home", path: "/dashboard" },
-  { icon: Stethoscope, labelKey: "nav.cropDoc", path: "/crop-doctor" },
+  { icon: FileText, labelKey: "schemes.title", path: "/schemes" },
   { icon: MessageSquare, labelKey: "aiChat.title", path: "/ai-chat", isCenter: true },
   { icon: ShoppingCart, labelKey: "nav.market", path: "/market" },
   { icon: User, labelKey: "profile.title", path: "/profile" },

@@ -1,0 +1,37 @@
+
+C:\Users\ASUS\Desktop\krishi-ai-main\Krishi-AI\src\pages\AiChat.tsx
+   55:33  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   85:44  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   85:81  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   91:38  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   93:25  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   94:25  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+   99:37  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  209:13  error    'response' is never reassigned. Use 'const' instead                                                                prefer-const
+  220:13  error    'data' is never reassigned. Use 'const' instead                                                                    prefer-const
+  251:21  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  266:6   warning  React Hook useCallback has a missing dependency: 'imagePreview'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  294:60  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+
+C:\Users\ASUS\Desktop\krishi-ai-main\Krishi-AI\src\pages\CropDoctor.tsx
+   50:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   63:15  error  Empty block statement                     no-empty
+   75:15  error  Empty block statement                     no-empty
+  230:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\ASUS\Desktop\krishi-ai-main\Krishi-AI\src\pages\Dashboard.tsx
+  136:77  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  222:6   warning  React Hook useEffect has a missing dependency: 'notifications'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\ASUS\Desktop\krishi-ai-main\Krishi-AI\src\pages\Profile.tsx
+   25:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\ASUS\Desktop\krishi-ai-main\Krishi-AI\src\pages\Weather.tsx
+  21:44  error    Unexpected any. Specify a different type                                                                                @typescript-eslint/no-explicit-any
+  92:6   warning  React Hook useEffect has a missing dependency: 'getWeatherCondition'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  94:48  error    Unexpected any. Specify a different type                                                                                @typescript-eslint/no-explicit-any
+
+✖ 23 problems (20 errors, 3 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
