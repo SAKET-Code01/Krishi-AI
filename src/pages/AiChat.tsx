@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Bot, Mic, MicOff, Volume2, VolumeX, X, MoreVertical, CheckCheck, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { sendMessage } from "@/lib/api";
 
 type Message = {
   id: string;
@@ -192,45 +193,24 @@ const AiChat = () => {
         aiText = data.text || "No response received.";
 
       } else {
-        const baseSystemPrompt = language === "hi"
-          ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Hindi (Devanagari script). Keep actionable."
-          : language === "or"
-          ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Odia language. Keep actionable."
-          : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
+        const baseSystemPrompt =
+          language === "hi"
+            ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Hindi (Devanagari script). Keep actionable."
+            : language === "or"
+              ? "You are Krishi AI, an expert agriculture assistant helping farmers. Respond ONLY in Odia language. Keep actionable."
+              : "You are Krishi AI, an expert agriculture assistant helping farmers. Respond in English. Keep actionable.";
 
-        const response = await fetch(`${backendUrl}/api/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: currentInput, systemPrompt: baseSystemPrompt }),
-        });
-
-        if (response.status === 429) {
-          throw new Error("Too many requests. Please wait a moment.");
-        }
-
-        const data = await response.json();
-        aiText = data.text || "No response received.";
-
-        if (!aiText || aiText.trim() === "") {
-          throw new Error("AI returned empty response. Please try again.");
-        }
+        aiText = await sendMessage(currentInput, baseSystemPrompt);
 
         if (!isCorrectLanguage(aiText, language)) {
-          const stricterPrompt = language === "hi"
-            ? "Respond strictly in Hindi only."
-            : "Respond strictly in Odia language only.";
-
-          const retryResponse = await fetch(`${backendUrl}/api/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: currentInput, systemPrompt: `${baseSystemPrompt} ${stricterPrompt}` }),
-          });
-
-          if (retryResponse.ok) {
-            const retryData = await retryResponse.json();
-            if (retryData.text) {
-              aiText = retryData.text;
-            }
+          const stricterPrompt =
+            language === "hi" ? "Respond strictly in Hindi only." : "Respond strictly in Odia language only.";
+          const retried = await sendMessage(
+            currentInput,
+            `${baseSystemPrompt} ${stricterPrompt}`
+          );
+          if (retried && retried !== "No response from AI" && retried !== "Error connecting to AI") {
+            aiText = retried;
           }
         }
       }
