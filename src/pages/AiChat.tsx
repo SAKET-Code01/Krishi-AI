@@ -51,7 +51,7 @@ const AiChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  const backendUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+  const backendUrl = import.meta.env.VITE_API_BASE_URL || "https://krishi-ai-tasn.onrender.com";
 
   useEffect(() => {
     if (messages.length === 0) {
