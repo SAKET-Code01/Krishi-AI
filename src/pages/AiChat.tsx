@@ -214,11 +214,13 @@ const AiChat = () => {
         if (response.status === 429) {
           throw new Error("Too many requests. Please wait a moment.");
         }
-        if (!response.ok) throw new Error("Backend connection failed");
-        
         let data = await response.json();
         
-        aiText = data.text || data.response || "No response received.";
+        if (response.ok) {
+          aiText = data.text;
+        } else {
+          aiText = data.text || "No response received.";
+        }
 
         // Fallback Safety Check
         if (!isCorrectLanguage(aiText, language)) {
