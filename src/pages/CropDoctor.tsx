@@ -135,8 +135,6 @@ const CropDoctor = () => {
       body: formData,
     });
 
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
-
     const data = await response.json();
     const rawText = data.text || "{}";
     const cleanJson = rawText.replace(/```json|```/g, "").trim();
