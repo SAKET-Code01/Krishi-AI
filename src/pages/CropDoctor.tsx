@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, Camera, Stethoscope, Leaf, Bug, Droplets, ArrowLeft,
   CheckCircle, AlertTriangle, RefreshCw, Trash2, MapPin, Sun, Cloud, CloudRain, Wind,
-  XCircle, Lightbulb, Shield, ImageOff
+  XCircle, Lightbulb, Shield, ImageOff, Activity
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -583,3 +583,4 @@ const CropDoctor = () => {
 };
 
 export default CropDoctor;
+
