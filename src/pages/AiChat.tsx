@@ -218,10 +218,7 @@ const AiChat = () => {
         
         let data = await response.json();
         
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || data.text || `Server error: ${response.status}`);
-        }
-        aiText = data.text;
+        aiText = data.text || data.response || "No response received.";
 
         // Fallback Safety Check
         if (!isCorrectLanguage(aiText, language)) {
@@ -235,10 +232,7 @@ const AiChat = () => {
 
           if (retryResponse.ok) {
             const retryData = await retryResponse.json();
-            if (!retryData.success) {
-              throw new Error(retryData.error || retryData.text || "AI retry failed.");
-            }
-            aiText = retryData.text;
+            aiText = retryData.text || retryData.response || "No response received.";
           }
         }
       }
