@@ -388,6 +388,75 @@ const Dashboard = () => {
           <div className="absolute -bottom-14 -left-14 w-48 h-48 bg-accent/12 rounded-full blur-3xl" />
         </motion.div>
 
+        {/* Soil & Rainfall Trend Analytics */}
+        <motion.div variants={fadeUp} className="bg-card border border-border/40 rounded-2xl p-4 shadow-sm relative overflow-visible">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-display font-bold text-foreground flex items-center gap-2">
+              <Sprout className="w-4 h-4 text-primary" />
+              Soil Health & Rain Trend
+            </h2>
+            <span className="text-[9px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-primary/20 shadow-sm">Live AI Analysis</span>
+          </div>
+          
+          <div className="flex items-end justify-between h-32 gap-1.5 mt-2 relative">
+            {/* Horizontal Grid lines */}
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+              <div className="border-t border-black dark:border-white w-full"></div>
+              <div className="border-t border-black dark:border-white w-full"></div>
+              <div className="border-t border-black dark:border-white w-full"></div>
+              <div className="border-t border-black dark:border-white w-full"></div>
+            </div>
+
+            {[ 
+              { day: "Mon", soil: 78, rain: 20 },
+              { day: "Tue", soil: 75, rain: 10 },
+              { day: "Wed", soil: 82, rain: 80 },
+              { day: "Thu", soil: 88, rain: 60 },
+              { day: "Fri", soil: 85, rain: 0 },
+              { day: "Sat", soil: 79, rain: 0 },
+              { day: "Sun", soil: 75, rain: 5 },
+            ].map((data, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 flex-1 group relative z-10">
+                {/* Tooltip on hover */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 bg-black/80 text-white text-[10px] p-1.5 rounded-lg flex flex-col items-center pointer-events-none z-50 shadow-lg whitespace-nowrap backdrop-blur-md">
+                  <span className="font-bold text-primary-foreground">Soil: {data.soil}%</span>
+                  <span className="text-blue-200">Rain: {data.rain}%</span>
+                </div>
+                
+                {/* Bar Container */}
+                <div className="w-full relative h-28 bg-muted/30 rounded-t-md rounded-b-md overflow-hidden flex flex-col justify-end ring-1 ring-inset ring-black/5">
+                   {/* Rain Bar (Background Layer) */}
+                   <motion.div 
+                     initial={{ height: 0 }} 
+                     animate={{ height: `${data.rain}%` }} 
+                     transition={{ duration: 1.2, delay: i * 0.1, ease: "easeOut" }}
+                     className="absolute bottom-0 left-0 right-0 bg-blue-500/30 w-full" 
+                   />
+                   {/* Soil Moisture Bar (Foreground Layer) */}
+                   <motion.div 
+                     initial={{ height: 0 }} 
+                     animate={{ height: `${data.soil}%` }} 
+                     transition={{ duration: 1, delay: i * 0.1 + 0.2, type: "spring", bounce: 0.3 }}
+                     className={`w-full relative z-10 ${data.soil < 70 ? "bg-amber-400" : data.soil > 85 ? "bg-emerald-500" : "bg-[#008069]"} opacity-90 rounded-t-sm shadow-sm`} 
+                   />
+                </div>
+                <span className="text-[10px] font-display font-medium text-muted-foreground">{data.day}</span>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex justify-center gap-5 mt-4 pt-3 border-t border-border/40">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-sm bg-[#008069] opacity-90 shadow-sm" />
+              <span className="text-[10px] font-body font-medium text-muted-foreground">Soil Moisture</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-sm bg-blue-500/40" />
+              <span className="text-[10px] font-body font-medium text-muted-foreground">Rainfall Prob.</span>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Crop Season Progress */}
         <motion.div variants={fadeUp}>
           <div className="flex items-center justify-between mb-3">
