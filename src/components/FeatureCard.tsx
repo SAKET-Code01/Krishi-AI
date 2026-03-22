@@ -21,7 +21,7 @@ const FeatureCard = ({ icon: Icon, title, description, path, gradient }: Feature
       className={`rounded-2xl p-4 md:p-6 cursor-pointer shimmer-on-hover card-hover-glow transition-all duration-300 group ${
         gradient
           ? "gradient-hero text-primary-foreground shadow-lg"
-          : "bg-card border border-border/60 hover:border-primary/30"
+          : "glass-card border border-white/30 hover:border-primary/30 shadow-card"
       }`}
     >
       <div className="flex items-start justify-between mb-3 md:mb-4">

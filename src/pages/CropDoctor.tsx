@@ -198,7 +198,7 @@ const CropDoctor = () => {
   return (
     <div className="min-h-screen bg-mesh pb-28">
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-md border-b border-border/40 px-4 py-4 sticky top-0 z-30">
+      <div className="glass-card border-b border-white/30 px-4 py-4 sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">
             <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -215,7 +215,7 @@ const CropDoctor = () => {
 
       <div className="container mx-auto px-4 py-5 max-w-lg space-y-5">
         {/* Context Card */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border/40 p-4 card-hover-glow">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl border border-white/30 p-4 card-hover-glow shadow-card">
           <div className="space-y-3">
             <div className="space-y-1.5 relative">
               <Label className="flex items-center gap-2 text-xs font-display font-semibold text-foreground">

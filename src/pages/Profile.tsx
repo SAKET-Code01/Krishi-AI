@@ -123,7 +123,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-mesh pb-28">
       {/* Header */}
-      <div className="bg-card/80 backdrop-blur-md border-b border-border/40 px-4 py-4 sticky top-0 z-30">
+      <div className="glass-card backdrop-blur-md border-b border-white/30 px-4 py-4 sticky top-0 z-30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">
@@ -160,7 +160,7 @@ const Profile = () => {
 
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
           {/* Avatar + Personal Info Section */}
-          <motion.div variants={fadeUp} className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border/40 p-6 card-hover-glow shadow-sm">
+          <motion.div variants={fadeUp} className="glass-card rounded-2xl border border-white/30 p-6 card-hover-glow shadow-card">
             <div className="flex items-center gap-4 mb-5">
               <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center text-primary-foreground font-display font-bold text-xl shadow-md border border-primary/20">
                 {initials}
@@ -241,7 +241,7 @@ const Profile = () => {
           </motion.div>
 
           {/* Farm Details Section */}
-          <motion.div variants={fadeUp} className="bg-card/70 backdrop-blur-xl rounded-2xl border border-border/40 p-6 card-hover-glow shadow-sm">
+          <motion.div variants={fadeUp} className="glass-card rounded-2xl border border-white/30 p-6 card-hover-glow shadow-card">
             <p className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t("profile.farmDetails")}</p>
 
             <div className="space-y-4">

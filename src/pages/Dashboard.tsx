@@ -111,7 +111,7 @@ const KrishiInsight = ({ temp, condition }: { temp: string; condition: string })
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl p-4 border border-primary/15 bg-gradient-to-r from-primary/8 via-primary/5 to-secondary/5"
+      className="relative overflow-hidden rounded-2xl p-4 border border-primary/15 glass-card shadow-card"
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
@@ -223,10 +223,10 @@ const Dashboard = () => {
   }, [t]);
 
   const quickActions = [
-    { icon: MessageSquare, label: "AI Chat", path: "/ai-chat", color: "from-primary to-emerald-500" },
-    { icon: TrendingUp, label: "Market", path: "/market", color: "from-amber-500 to-orange-400" },
-    { icon: FileText, label: "Schemes", path: "/schemes", color: "from-violet-500 to-purple-400" },
-    { icon: Briefcase, label: "Jobs", path: "/jobs", color: "from-blue-500 to-cyan-400" },
+    { icon: MessageSquare, label: "AI Chat", path: "/ai-chat", color: "from-primary to-emerald-800" },
+    { icon: TrendingUp, label: "Market", path: "/market", color: "from-amber-700 to-orange-900" },
+    { icon: FileText, label: "Schemes", path: "/schemes", color: "from-orange-800 to-amber-950" }, // Deep Brown/Terracotta
+    { icon: Briefcase, label: "Jobs", path: "/jobs", color: "from-stone-700 to-emerald-900" }, // Stone/Forest
   ];
 
   const crops = [
@@ -257,7 +257,7 @@ const Dashboard = () => {
               setNotifDot(false);
               setShowNotifications(!showNotifications);
             }}
-            className="relative w-10 h-10 rounded-xl bg-card flex items-center justify-center border border-border/50 transition-all hover:shadow-sm hover:border-primary/20 group"
+            className="relative w-10 h-10 rounded-2xl bg-card/60 backdrop-blur-sm flex items-center justify-center border border-border/50 transition-all hover:shadow-sm hover:border-primary/20 group"
           >
             <Bell className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
             {notifDot && (
@@ -272,7 +272,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="absolute top-12 right-0 w-72 bg-card border border-border/60 rounded-2xl shadow-elevated z-50 p-4 max-h-[400px] overflow-y-auto"
+                className="absolute top-12 right-0 w-72 glass-card border border-border/40 rounded-2xl shadow-elevated z-50 p-4 max-h-[400px] overflow-y-auto"
               >
                 <div className="flex items-center justify-between mb-4 pb-2 border-b border-border/40">
                   <h3 className="text-sm font-display font-bold text-foreground">Notifications</h3>
@@ -317,7 +317,7 @@ const Dashboard = () => {
                 key={action.path}
                 whileTap={{ scale: 0.92 }}
                 onClick={() => navigate(action.path)}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-card border border-border/40 card-hover-glow group"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl glass-card border border-white/30 card-hover-glow group shadow-card"
               >
                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
                   <Icon className="w-5 h-5 text-white" />
@@ -404,7 +404,7 @@ const Dashboard = () => {
                 key={crop.name}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/reports")}
-                className="bg-card border border-border/40 rounded-xl p-4 cursor-pointer card-hover-glow"
+                className="glass-card border border-white/30 rounded-2xl p-4 cursor-pointer card-hover-glow shadow-card"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2.5">
@@ -441,7 +441,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
+          <div className="glass-card border border-white/30 rounded-2xl overflow-hidden shadow-card">
             {crops.map((crop, i) => (
               <motion.div
                 key={i}

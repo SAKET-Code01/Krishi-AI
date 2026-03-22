@@ -53,7 +53,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-mesh">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">

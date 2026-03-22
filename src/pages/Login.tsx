@@ -195,7 +195,7 @@ const Login = () => {
             className="w-full max-w-md"
           >
             {/* Card */}
-            <div className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-elevated border border-border/40 p-8">
+            <div className="glass-card rounded-3xl shadow-elevated border border-white/30 p-8">
               {/* Header */}
               <div className="mb-8">
                 <h2 className="text-2xl font-display font-extrabold text-foreground mb-1">

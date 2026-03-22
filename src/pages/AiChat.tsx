@@ -274,22 +274,22 @@ const AiChat = () => {
   const formatTime = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#EFEAE2] font-body relative">
+    <div className="flex flex-col h-[100dvh] bg-mesh font-body relative">
       {/* WhatsApp style exact Header */}
-      <div className="bg-[#008069] text-white px-3 py-3 flex items-center justify-between sticky top-0 z-20 shadow-md">
+      <div className="bg-primary text-primary-foreground px-3 py-3 flex items-center justify-between sticky top-0 z-20 shadow-md">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-1.5 -ml-1 rounded-full hover:bg-white/10 transition">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="relative">
             <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center overflow-hidden border border-white/20 shadow-sm">
-               <Bot className="w-6 h-6 text-[#008069]" />
+               <Bot className="w-6 h-6 text-primary" />
             </div>
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-[#008069] rounded-full"></div>
+            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-primary rounded-full"></div>
           </div>
           <div className="ml-1 flex flex-col">
             <span className="font-semibold text-base leading-tight">Krishi AI</span>
-            <span className="text-white/80 text-[11px] leading-tight flex items-center gap-1">
+            <span className="text-primary-foreground/80 text-[11px] leading-tight flex items-center gap-1">
               {isLoading ? "typing..." : "online"}
             </span>
           </div>
@@ -298,7 +298,7 @@ const AiChat = () => {
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as "en" | "hi" | "or")}
-            className="bg-white/10 text-white text-xs font-medium rounded px-1.5 py-1 outline-none appearance-none border border-white/20 cursor-pointer text-center mr-1"
+            className="bg-primary-foreground/10 text-primary-foreground text-xs font-medium rounded px-1.5 py-1 outline-none appearance-none border border-white/20 cursor-pointer text-center mr-1"
           >
             <option value="en" className="text-black">EN</option>
             <option value="hi" className="text-black">HI</option>
@@ -308,10 +308,10 @@ const AiChat = () => {
             onClick={() => setVoiceEnabled(!voiceEnabled)} 
             className="p-2 rounded-full hover:bg-white/10 transition"
           >
-            {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 opacity-70" />}
+            {voiceEnabled ? <Volume2 className="w-5 h-5 text-primary-foreground" /> : <VolumeX className="w-5 h-5 text-primary-foreground opacity-70" />}
           </button>
           <button className="p-2 rounded-full hover:bg-white/10 transition hidden sm:flex">
-            <MoreVertical className="w-5 h-5" />
+            <MoreVertical className="w-5 h-5 text-primary-foreground" />
           </button>
         </div>
       </div>
@@ -335,16 +335,16 @@ const AiChat = () => {
                 className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-4`}
               >
                 <div 
-                  className={`relative max-w-[85%] sm:max-w-[75%] rounded-[15px] px-3 py-2 shadow-sm 
-                    ${isUser ? "bg-[#d9fdd3] text-[#111b21] rounded-tr-sm" : "bg-white text-[#111b21] rounded-tl-sm"}
+                  className={`relative max-w-[85%] sm:max-w-[75%] rounded-[15px] px-3 py-2 shadow-card 
+                    ${isUser ? "bg-primary/20 text-foreground rounded-tr-sm border border-primary/20" : "bg-card text-foreground rounded-tl-sm border border-border/50"}
                     ${msg.isError ? "border border-red-300 bg-red-50" : ""}
                   `}
                 >
                   {/* Decorative tail */}
                   <div className={`absolute top-0 w-4 h-4 
-                    ${isUser ? "-right-[9px] text-[#d9fdd3]" : "-left-[9px] text-white"}`}
+                    ${isUser ? "-right-[9px] text-primary/20" : "-left-[9px] text-card"}`}
                   >
-                    <svg viewBox="0 0 8 13" width="8" height="13" className={isUser ? "fill-[#d9fdd3]" : "fill-white"}>
+                    <svg viewBox="0 0 8 13" width="8" height="13" className={isUser ? "fill-primary/20" : "fill-card"}>
                       {isUser 
                         ? <path d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"/> 
                         : <path d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"/>}
@@ -401,7 +401,7 @@ const AiChat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-[#EFEAE2] z-20">
+      <div className="fixed bottom-0 left-0 right-0 p-2 sm:p-3 bg-transparent z-20">
         
         {/* Image Preview popup before sending */}
         <AnimatePresence>
@@ -425,7 +425,7 @@ const AiChat = () => {
 
         <div className="max-w-3xl mx-auto flex items-end gap-2">
           
-          <div className="flex-1 bg-white rounded-3xl flex items-end shadow-sm border border-black/5 overflow-hidden ring-1 ring-inset ring-black/5 focus-within:ring-[#008069]/50">
+          <div className="flex-1 bg-card rounded-3xl flex items-end shadow-card border border-amber-900/10 overflow-hidden ring-1 ring-inset ring-white/20 focus-within:ring-primary/50">
             {/* Attachment Button */}
             <button 
               onClick={() => fileInputRef.current?.click()}
@@ -451,7 +451,7 @@ const AiChat = () => {
                 }
               }}
               placeholder={isListening ? "Listening..." : "Message Krishi AI..."}
-              className={`w-full bg-transparent py-3.5 px-1 outline-none resize-none max-h-32 text-base ${isListening ? 'text-[#008069] font-medium' : 'text-[#111b21]'}`}
+              className={`w-full bg-transparent py-3.5 px-1 outline-none resize-none max-h-32 text-base ${isListening ? 'text-primary font-medium' : 'text-foreground'}`}
               rows={1}
               style={{ minHeight: '52px' }}
             />
@@ -471,9 +471,9 @@ const AiChat = () => {
           <button
             onClick={handleSend}
             disabled={(!input.trim() && !imagePreview) || isLoading}
-            className="w-[52px] h-[52px] rounded-full bg-[#008069] flex flex-col items-center justify-center shrink-0 shadow-sm hover:bg-[#006e5b] disabled:opacity-50 transition-colors"
+            className="w-[52px] h-[52px] rounded-full bg-primary flex flex-col items-center justify-center shrink-0 shadow-lg hover:shadow-primary/20 disabled:opacity-50 transition-all font-display font-bold"
           >
-            <Send className="w-5 h-5 text-white ml-0.5" />
+            <Send className="w-5 h-5 text-primary-foreground ml-0.5" />
           </button>
         </div>
       </div>

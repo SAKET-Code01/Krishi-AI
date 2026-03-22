@@ -11,7 +11,7 @@ interface DashboardCardProps {
 }
 
 const variantStyles = {
-  default: "bg-card border border-border/60",
+  default: "glass-card border border-amber-900/10 shadow-card",
   primary: "bg-primary/5 border border-primary/15",
   secondary: "bg-secondary/5 border border-secondary/15",
   accent: "bg-accent/8 border border-accent/20",

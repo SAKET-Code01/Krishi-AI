@@ -16,8 +16,8 @@ const LandFinder = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="bg-card border-b-2 border-border px-4 py-4">
+    <div className="min-h-screen bg-mesh pb-28">
+      <div className="glass-card border-b border-white/30 px-4 py-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted">
             <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -48,7 +48,7 @@ const LandFinder = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-card border-2 border-border rounded-xl p-4"
+            className="glass-card border border-white/30 rounded-2xl p-4 card-hover-glow shadow-card"
           >
             <div className="flex items-start justify-between mb-2">
               <div>

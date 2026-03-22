@@ -139,13 +139,13 @@ const Weather = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="bg-secondary px-4 pt-6 pb-8 rounded-b-3xl">
+    <div className="min-h-screen bg-mesh pb-28">
+      <div className="gradient-hero px-4 pt-6 pb-8 rounded-b-3xl shadow-lg">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-secondary-foreground/10">
-            <ArrowLeft className="w-5 h-5 text-secondary-foreground" />
+          <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-white/10 transition-colors">
+            <ArrowLeft className="w-5 h-5 text-primary-foreground" />
           </button>
-          <h1 className="text-xl font-display font-bold text-secondary-foreground">{t("weather.title")}</h1>
+          <h1 className="text-xl font-display font-bold text-primary-foreground">{t("weather.title")}</h1>
         </div>
 
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
@@ -153,12 +153,12 @@ const Weather = () => {
             <div className="w-20 h-20 border-4 border-secondary-foreground/30 border-t-secondary-foreground rounded-full animate-spin mx-auto mb-4" />
           ) : (
             <>
-              <CurrentIcon className="w-20 h-20 text-secondary-foreground mx-auto mb-2 animate-float" />
-              <p className="text-5xl font-display font-extrabold text-secondary-foreground">{currentWeather.temp}</p>
-              <p className="font-body text-secondary-foreground/80 mt-1">
+              <CurrentIcon className="w-20 h-20 text-primary-foreground mx-auto mb-2 animate-float" />
+              <p className="text-5xl font-display font-extrabold text-primary-foreground">{currentWeather.temp}</p>
+              <p className="font-body text-primary-foreground/90 mt-1">
                 {currentWeather.condition} • {userLocation}
               </p>
-              <div className="flex justify-center gap-6 mt-4 text-sm text-secondary-foreground/80 font-body">
+              <div className="flex justify-center gap-6 mt-4 text-sm text-primary-foreground/90 font-body">
                 <span className="flex items-center gap-1"><Droplets className="w-4 h-4" /> {currentWeather.humidity}</span>
                 <span className="flex items-center gap-1"><Wind className="w-4 h-4" /> {currentWeather.wind}</span>
                 <span className="flex items-center gap-1"><Thermometer className="w-4 h-4" /> {t("dash.feelsLike")} {currentWeather.feelsLike}</span>
@@ -179,8 +179,8 @@ const Weather = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`shrink-0 w-24 rounded-xl p-3 text-center border-2 ${
-                  i === 0 ? "bg-primary/5 border-primary/20" : "bg-card border-border"
+                className={`shrink-0 w-24 rounded-2xl p-4 text-center border shadow-card transition-all ${
+                  i === 0 ? "glass-card border-primary/30 ring-2 ring-primary/20 scale-105 z-10" : "glass-card border-white/20"
                 }`}
               >
                 <p className="text-xs font-display font-semibold text-muted-foreground">{day.day}</p>
@@ -199,7 +199,7 @@ const Weather = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-6"
+          className="glass-card border border-white/30 rounded-3xl p-6 mb-6 shadow-card"
         >
           {aiAnalysis || analyzing ? (
             <div className="space-y-3">

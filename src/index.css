@@ -19,58 +19,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════
+   EARTHY ABSTRACT THEME — Krishi AI
+   Palette: sage, terracotta, warm amber, clay, forest
+   ═══════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Warm off-white with green tint */
+    --background: 40 25% 96%;
+    --foreground: 30 15% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* Warm cream cards */
+    --card: 38 30% 97%;
+    --card-foreground: 30 15% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 38 25% 98%;
+    --popover-foreground: 30 15% 12%;
 
-    --primary: 142 72% 37%;
-    --primary-foreground: 0 0% 100%;
+    /* Forest green primary */
+    --primary: 145 45% 32%;
+    --primary-foreground: 40 30% 98%;
 
-    --secondary: 199 89% 48%;
-    --secondary-foreground: 0 0% 100%;
+    /* Earthy teal secondary */
+    --secondary: 170 35% 40%;
+    --secondary-foreground: 40 30% 98%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 35%;
+    /* Warm terracotta accent */
+    --muted: 35 20% 92%;
+    --muted: 35 15% 92%; /* Warm Grey-Brown */
+    --muted-foreground: 30 12% 42%;
 
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 100%;
+    /* Terracotta accent */
+    --accent: 18 65% 50%; /* Terracotta */
+    --accent-foreground: 40 30% 98%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --clay: 25 30% 40%; /* Earthy Umber/Brown */
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 142 72% 37%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 40 30% 98%;
 
-    --radius: 0.75rem;
+    /* Warm borders */
+    --border: 35 15% 88%;
+    --input: 35 18% 86%;
+    --ring: 145 45% 32%;
 
-    /* Custom tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(199, 89%, 48%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(142, 72%, 37%) 0%, hsl(38, 92%, 50%) 100%);
-    --gradient-sky: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(210, 40%, 98%) 100%);
-    --shadow-card: 0 4px 24px -4px hsl(142 72% 37% / 0.1);
-    --shadow-elevated: 0 12px 40px -8px hsl(222 47% 11% / 0.15);
+    --radius: 1rem;
+
+    /* Earthy gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--clay)) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(30, 60%, 45%) 100%);
+    --gradient-sky: linear-gradient(160deg, hsl(170, 35%, 40%) 0%, hsl(145, 45%, 32%) 100%);
+    --gradient-terracotta: linear-gradient(135deg, hsl(18, 70%, 55%) 0%, hsl(var(--clay)) 100%);
+    --gradient-card: linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 245, 235, 0.95) 100%);
+    --shadow-card:
+      0 4px 20px -4px hsl(30 20% 30% / 0.06),
+      0 2px 8px -2px hsl(145 30% 30% / 0.04);
+    --shadow-elevated:
+      0 20px 50px -12px hsl(30 15% 15% / 0.12),
+      0 8px 24px -8px hsl(145 30% 30% / 0.06);
+
     --font-display: "Plus Jakarta Sans", "Noto Sans Oriya", "Noto Sans Devanagari", "Kalinga", "Mangal", sans-serif;
     --font-body: "Inter", "Noto Sans Oriya", "Noto Sans Devanagari", "Kalinga", "Mangal", sans-serif;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 142 72% 37%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 142 72% 95%;
-    --sidebar-accent-foreground: 142 72% 20%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 142 72% 37%;
-    
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.4);
+    --sidebar-background: 38 25% 97%;
+    --sidebar-foreground: 30 12% 26%;
+    --sidebar-primary: 145 45% 32%;
+    --sidebar-primary-foreground: 40 30% 98%;
+    --sidebar-accent: 145 30% 94%;
+    --sidebar-accent-foreground: 145 40% 20%;
+    --sidebar-border: 35 18% 86%;
+    --sidebar-ring: 145 45% 32%;
+
+    --glass-bg: rgba(255, 253, 247, 0.5);
+    --glass-border: rgba(255, 253, 247, 0.35);
   }
 }
 
@@ -105,48 +127,75 @@
   .gradient-warm {
     background: var(--gradient-warm);
   }
+  .gradient-terracotta {
+    background: var(--gradient-terracotta);
+  }
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
+
+  /* Earthy glassmorphism — warm frosted cream */
   .glass-card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(24px) saturate(1.8);
-    -webkit-backdrop-filter: blur(24px) saturate(1.8);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 
-      0 8px 32px 0 rgba(31, 38, 135, 0.06),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+    background: var(--gradient-card);
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid rgba(255, 250, 240, 0.4);
+    box-shadow:
+      0 8px 32px 0 rgba(60, 40, 20, 0.05),
+      0 2px 8px 0 rgba(60, 40, 20, 0.03),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
   }
+
+  /* Earthy frosted bottom nav */
   .glass-nav {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.06);
+    background: linear-gradient(180deg,
+      rgba(255, 253, 247, 0.6) 0%,
+      rgba(245, 240, 230, 0.7) 100%
+    );
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border-top: 1px solid rgba(255, 250, 240, 0.45);
+    box-shadow:
+      0 -8px 40px rgba(60, 40, 20, 0.04),
+      0 -2px 12px rgba(60, 40, 20, 0.02);
   }
+
+  /* Abstract earthy mesh — organic orbs */
   .bg-mesh {
     background-color: hsl(var(--background));
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(142, 72%, 37%, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(199, 89%, 48%, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(38, 92%, 50%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(142, 72%, 37%, 0.08) 0px, transparent 50%);
+    background-image:
+    radial-gradient(at 10% 20%, hsla(145, 45%, 32%, 0.12) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, hsla(18, 65%, 50%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, hsla(25, 30%, 40%, 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 90%, hsla(170, 35%, 40%, 0.08) 0px, transparent 50%),
+    radial-gradient(at 20% 80%, hsla(38, 30%, 50%, 0.08) 0px, transparent 50%);
   }
+
   .text-gradient {
     background: var(--gradient-hero);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Earthy card hover with organic lift */
   .card-hover-glow {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.4s ease;
   }
   .card-hover-glow:hover {
-    box-shadow: 0 8px 30px -4px hsl(142 72% 37% / 0.15), 0 4px 12px -2px hsl(142 72% 37% / 0.08);
+    box-shadow:
+      0 16px 48px -8px hsl(145 45% 32% / 0.1),
+      0 8px 20px -4px hsl(30 40% 40% / 0.06),
+      0 0 0 1px hsl(145 45% 32% / 0.06);
+    transform: translateY(-3px);
+    border-color: hsl(145 45% 32% / 0.12);
   }
+
   .accent-strip-left {
     position: relative;
     overflow: hidden;
@@ -159,8 +208,8 @@
     bottom: 8px;
     width: 4px;
     border-radius: 0 4px 4px 0;
-    background: currentColor;
-    opacity: 0.6;
+    background: var(--gradient-hero);
+    opacity: 0.7;
   }
 }
 
@@ -169,7 +218,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Shimmer sweep animation for cards */
+/* Shimmer sweep */
 @keyframes shimmer-sweep {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -200,12 +249,20 @@ html {
   animation: shimmer-sweep 0.6s ease-in-out;
 }
 
+/* Organic float animation */
+@keyframes orb-float {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  25% { transform: translate(6px, -10px) scale(1.04); }
+  50% { transform: translate(-3px, -6px) scale(0.98); }
+  75% { transform: translate(5px, 3px) scale(1.02); }
+}
+
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 12px 4px hsl(142 72% 37% / 0.25);
+    box-shadow: 0 0 16px 6px hsl(145 45% 32% / 0.2), 0 0 4px 2px hsl(170 35% 40% / 0.1);
   }
   50% {
-    box-shadow: 0 0 20px 6px hsl(142 72% 37% / 0.4);
+    box-shadow: 0 0 28px 10px hsl(145 45% 32% / 0.3), 0 0 8px 4px hsl(170 35% 40% / 0.12);
   }
 }
 
@@ -217,7 +274,7 @@ html {
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -227,10 +284,10 @@ html {
 
 @keyframes gentle-ring {
   0%, 100% {
-    box-shadow: 0 0 0 0 hsl(142 72% 37% / 0.3);
+    box-shadow: 0 0 0 0 hsl(145 45% 32% / 0.25);
   }
   50% {
-    box-shadow: 0 0 0 6px hsl(142 72% 37% / 0);
+    box-shadow: 0 0 0 8px hsl(145 45% 32% / 0);
   }
 }
 
@@ -248,4 +305,8 @@ html {
 
 .animate-gentle-ring {
   animation: gentle-ring 2s ease-in-out infinite;
+}
+
+.animate-orb-float {
+  animation: orb-float 8s ease-in-out infinite;
 }
