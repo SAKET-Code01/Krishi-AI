@@ -7,29 +7,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies / builds
+node_modules/
+dist/
+dist-ssr/
+
+# Environment
 .env
 .env.*
 !.env.example
-backend/uploads/
 *.local
 
-# Agent Artifacts
+# Backend runtime
+backend/uploads/
+
+# Local/generated artifacts
+tmp/
+.temp/
+.vite/
+lint_results.json
+lint_results.txt
 .agents/
 .agent/
 _agents/
 _agent/
-tmp/
-.temp/
 .gemini/
 .vercel/
 
-# Editor directories and files
+# Editor / OS
 .vscode/*
-! .vscode/extensions.json
-.idea
+!.vscode/extensions.json
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
