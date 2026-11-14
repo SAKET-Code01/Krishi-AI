@@ -25,21 +25,53 @@ const limiter = rateLimit({
   legacyHeaders: false, 
 });
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    // Allow non-browser clients and only explicitly configured web origins.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, _file, cb) => cb(null, `${Date.now()}.wav`),
+  filename: (_req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, "");
+    cb(null, `${Date.now()}-${require("crypto").randomUUID()}${extension}`);
+  },
 });
 
-const upload = multer({ storage });
+const allowedUploadTypes = new Set([
+  "audio/wav",
+  "audio/x-wav",
+  "audio/wave",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (allowedUploadTypes.has(file.mimetype)) return cb(null, true);
+    return cb(new Error("Unsupported upload type. Use WAV audio or JPEG, PNG, or WebP images."));
+  },
+});
 
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
     return null;
@@ -54,7 +86,7 @@ const safeUnlink = (filePath) => {
   }
 };
 
-app.post('/api/process-audio', upload.single('audio'), async (req, res) => {
+app.post('/api/process-audio', rateLimit({ windowMs: 60_000, max: 10 }), upload.single('audio'), async (req, res) => {
   const audioFilePath = req.file?.path;
 
   if (!audioFilePath) {
@@ -456,7 +488,7 @@ app.get('/api/market-prices', limiter, async (req, res) => {
   try {
     const apiKey = process.env.DATA_GOV_IN_API_KEY;
     if (!apiKey) {
-      return res.json({ success: true, data: getMockData(req.query.state) });
+      return res.json({ success: true, data: getMockData(req.query.state), isMock: true });
     }
 
     const { state, district } = req.query;
@@ -554,5 +586,5 @@ app.listen(PORT, () => {
   console.log('[SYSTEM] --- Environment Variables Check ---');
   console.log(`[SYSTEM] GROQ_API_KEY: ${process.env.GROQ_API_KEY ? '✅ Configured' : '❌ Missing'}`);
   console.log(`[SYSTEM] HF_API_KEY: ${process.env.HF_API_KEY ? '✅ Configured' : '❌ Missing'}`);
-  console.log(`[SYSTEM] GEMINI_API_KEY: ${(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY) ? '✅ Configured' : '❌ Missing'}`);
+  console.log(`[SYSTEM] GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Missing'}`);
 });
