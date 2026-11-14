@@ -75,6 +75,7 @@ const MarketPrices = () => {
   const [search, setSearch] = useState("");
   const [marketData, setMarketData] = useState<MarketItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMockData, setIsMockData] = useState(false);
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [sortBy, setSortBy] = useState("recommended");
@@ -83,6 +84,7 @@ const MarketPrices = () => {
     const fetchPrices = async () => {
       try {
         setLoading(true);
+        setIsMockData(false);
         const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
         let url = `${baseUrl}/api/market-prices`;
         const params = new URLSearchParams();
@@ -96,12 +98,15 @@ const MarketPrices = () => {
         const json = await response.json();
         if (json.success && json.data) {
           setMarketData(json.data);
+          setIsMockData(Boolean(json.isMock));
         } else {
           setMarketData(getStaticData());
+          setIsMockData(true);
         }
       } catch (error) {
         console.error("Failed to fetch market prices:", error);
         setMarketData(getStaticData());
+        setIsMockData(true);
       } finally {
         setLoading(false);
       }
@@ -201,6 +206,11 @@ const MarketPrices = () => {
       </div>
 
       <div className="container mx-auto px-4 py-4 space-y-3">
+        {!loading && isMockData && (
+          <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-900">
+            {t("market.mock_warning")}
+          </div>
+        )}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-10 space-y-3">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
