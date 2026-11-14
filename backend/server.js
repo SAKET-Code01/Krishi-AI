@@ -574,7 +574,7 @@ app.get('/api/market-prices', limiter, async (req, res) => {
     res.json({ success: true, data: formattedData });
   } catch (error) {
     console.error('Mandi prices fetch error:', error);
-    res.json({ success: true, data: getMockData(req.query.state) }); // Fallback
+    res.json({ success: true, data: getMockData(req.query.state), isMock: true }); // Explicitly mark fallback prices as mock data
   }
 });
 
