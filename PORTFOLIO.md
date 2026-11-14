@@ -1,20 +1,19 @@
-# Portfolio Notes
+# Portfolio Contribution Notes — Krishi-AI
 
-This repository is a team project. Repository contents document project-level technology and features; individual contribution should be described separately and accurately.
+Krishi-AI is a collaborative agriculture application. Repository ownership and project-level technology do not imply that one contributor independently built every feature.
 
-## Portfolio Position
+## Saket's documented team responsibilities
 
-A practical AI-enabled agriculture application demonstrating web application integration, external APIs, AI services, and deployment.
+- Backend and application-flow work
+- Coordination and feature integration
+- Deployment support and testing
 
-## Verified Areas
+These responsibilities are based on Saket's public project description. List only the modules and commits that can be independently demonstrated in an interview.
 
-- React / Vite / TypeScript / Tailwind CSS
-- Node.js / Express
-- AI and external API integration
-- Google Cloud speech services
-- GitHub-based development workflow
-- Deployed web application
+## Project-level implementation
 
-## Contribution Attribution
+The repository contains a React/TypeScript frontend, an Express backend, and integrations with external AI, speech, vision, weather/market and scheme-related services. Some services depend on external credentials and may use fallback data.
 
-Personal responsibilities should be added only after confirming the exact modules or features contributed by Saket.
+## Interview positioning
+
+Describe this as team-based backend/system-flow integration and deployment collaboration. Do not claim sole ownership of the full application, model training, or every external integration unless the specific work can be shown and explained.
